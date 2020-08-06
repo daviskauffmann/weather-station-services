@@ -1,4 +1,4 @@
-import passport from 'passport';
+import passport from 'koa-passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 
 passport.use(new HeaderAPIKeyStrategy({
