@@ -38,6 +38,11 @@ routes.route({
     method: 'GET',
     path: '/:id',
     pre: passport.authenticate('headerapikey', { session: false }),
+    validate: {
+        params: {
+            id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+        },
+    },
     handler: async ctx => {
         const pressure = await Pressure.findById(ctx.params.id);
         if (!pressure) {
@@ -55,11 +60,14 @@ routes.route({
     path: '/:id',
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
-        type: 'json',
+        params: {
+            id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+        },
         body: {
             value: Joi.number(),
             date: Joi.string().isoDate(),
         },
+        type: 'json',
     },
     handler: async ctx => {
         const pressure = await Pressure.findByIdAndUpdate(ctx.params.id, ctx.request.body);
@@ -77,6 +85,11 @@ routes.route({
     method: 'DELETE',
     path: '/:id',
     pre: passport.authenticate('headerapikey', { session: false }),
+    validate: {
+        params: {
+            id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+        },
+    },
     handler: async ctx => {
         const pressure = await Pressure.findByIdAndDelete(ctx.params.id);
         if (!pressure) {
