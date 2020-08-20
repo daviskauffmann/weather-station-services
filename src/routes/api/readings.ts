@@ -1,6 +1,7 @@
 import router from 'koa-joi-router';
 import passport from 'koa-passport';
 import Reading from '../../models/Reading';
+import { OBJECT_ID_REGEX } from '../../utils/constants';
 
 const routes = router();
 const Joi = router.Joi;
@@ -9,8 +10,19 @@ routes.route({
     method: 'GET',
     path: '/',
     pre: passport.authenticate('headerapikey', { session: false }),
+    validate: {
+        query: {
+            start: Joi.string().isoDate(),
+            end: Joi.string().isoDate(),
+        }
+    },
     handler: async ctx => {
-        const readings = await Reading.find();
+        const readings = await Reading.find({
+            date: {
+                $gte: new Date(ctx.query.start || 0),
+                $lte: new Date(ctx.query.end || Date.now()),
+            },
+        });
         ctx.status = 200;
         ctx.body = { items: readings };
     },
@@ -42,15 +54,13 @@ routes.route({
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
         params: {
-            id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+            id: Joi.string().regex(OBJECT_ID_REGEX),
         },
     },
     handler: async ctx => {
         const reading = await Reading.findById(ctx.params.id);
         if (!reading) {
-            ctx.status = 404;
-            ctx.body = `Reading ${ctx.params.id} not found`;
-            return;
+            return ctx.throw(404, `Reading ${ctx.params.id} not found`);
         }
         ctx.status = 200;
         ctx.body = reading;
@@ -63,7 +73,7 @@ routes.route({
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
         params: {
-            id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+            id: Joi.string().regex(OBJECT_ID_REGEX),
         },
         body: {
             temperature: Joi.number(),
@@ -76,9 +86,7 @@ routes.route({
     handler: async ctx => {
         const reading = await Reading.findByIdAndUpdate(ctx.params.id, ctx.request.body);
         if (!reading) {
-            ctx.status = 404;
-            ctx.body = `Reading ${ctx.params.id} not found`;
-            return;
+            return ctx.throw(404, `Reading ${ctx.params.id} not found`);
         }
         ctx.status = 200;
         ctx.body = reading;
@@ -91,15 +99,13 @@ routes.route({
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
         params: {
-            id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+            id: Joi.string().regex(OBJECT_ID_REGEX),
         },
     },
     handler: async ctx => {
         const reading = await Reading.findByIdAndDelete(ctx.params.id);
         if (!reading) {
-            ctx.status = 404;
-            ctx.body = `Reading ${ctx.params.id} not found`;
-            return;
+            return ctx.throw(404, `Reading ${ctx.params.id} not found`);
         }
         ctx.status = 200;
     },
