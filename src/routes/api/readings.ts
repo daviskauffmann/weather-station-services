@@ -1,6 +1,6 @@
 import router from 'koa-joi-router';
 import passport from 'koa-passport';
-import Humidity from '../../models/Humidity';
+import Reading from '../../models/Reading';
 
 const routes = router();
 const Joi = router.Joi;
@@ -10,9 +10,9 @@ routes.route({
     path: '/',
     pre: passport.authenticate('headerapikey', { session: false }),
     handler: async ctx => {
-        const humidities = await Humidity.find();
+        const readings = await Reading.find();
         ctx.status = 200;
-        ctx.body = { items: humidities };
+        ctx.body = { items: readings };
     },
 });
 
@@ -23,14 +23,16 @@ routes.route({
     validate: {
         type: 'json',
         body: {
-            value: Joi.number().required(),
+            temperature: Joi.number().required(),
+            pressure: Joi.number().required(),
+            humidity: Joi.number().required(),
             date: Joi.string().isoDate().required(),
         },
     },
     handler: async ctx => {
-        const humidity = await Humidity.create(ctx.request.body);
+        const reading = await Reading.create(ctx.request.body);
         ctx.status = 201;
-        ctx.body = humidity;
+        ctx.body = reading;
     },
 });
 
@@ -44,14 +46,14 @@ routes.route({
         },
     },
     handler: async ctx => {
-        const humidity = await Humidity.findById(ctx.params.id);
-        if (!humidity) {
+        const reading = await Reading.findById(ctx.params.id);
+        if (!reading) {
             ctx.status = 404;
-            ctx.body = `Humidity ${ctx.params.id} not found`;
+            ctx.body = `Reading ${ctx.params.id} not found`;
             return;
         }
         ctx.status = 200;
-        ctx.body = humidity;
+        ctx.body = reading;
     },
 });
 
@@ -64,20 +66,22 @@ routes.route({
             id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
         },
         body: {
-            value: Joi.number(),
+            temperature: Joi.number(),
+            pressure: Joi.number(),
+            humidity: Joi.number(),
             date: Joi.string().isoDate(),
         },
         type: 'json',
     },
     handler: async ctx => {
-        const humidity = await Humidity.findByIdAndUpdate(ctx.params.id, ctx.request.body);
-        if (!humidity) {
+        const reading = await Reading.findByIdAndUpdate(ctx.params.id, ctx.request.body);
+        if (!reading) {
             ctx.status = 404;
-            ctx.body = `Humidity ${ctx.params.id} not found`;
+            ctx.body = `Reading ${ctx.params.id} not found`;
             return;
         }
         ctx.status = 200;
-        ctx.body = humidity;
+        ctx.body = reading;
     },
 });
 
@@ -91,10 +95,10 @@ routes.route({
         },
     },
     handler: async ctx => {
-        const humidity = await Humidity.findByIdAndDelete(ctx.params.id);
-        if (!humidity) {
+        const reading = await Reading.findByIdAndDelete(ctx.params.id);
+        if (!reading) {
             ctx.status = 404;
-            ctx.body = `Humidity ${ctx.params.id} not found`;
+            ctx.body = `Reading ${ctx.params.id} not found`;
             return;
         }
         ctx.status = 200;
