@@ -12,19 +12,32 @@ routes.route({
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
         query: {
-            start: Joi.string().isoDate(),
-            end: Joi.string().isoDate(),
+            start: Joi.string().isoDate().default(0),
+            end: Joi.string().isoDate().default(Date.now()),
+            projection: Joi.string(),
+            limit: Joi.number().default(10),
+            skip: Joi.number().default(0),
+            count: Joi.boolean().default(false),
         }
     },
     handler: async ctx => {
-        const readings = await Reading.find({
+        const query = Reading.find({
             date: {
-                $gte: new Date(ctx.query.start || 0),
-                $lte: new Date(ctx.query.end || Date.now()),
+                $gte: new Date(ctx.query.start),
+                $lte: new Date(ctx.query.end),
             },
-        });
+        }, ctx.query.projection)
+            .limit(ctx.query.limit)
+            .skip(ctx.query.skip);
+        const items = await query.exec();
+        const count = ctx.query.count
+            ? await query.countDocuments().exec()
+            : undefined;
         ctx.status = 200;
-        ctx.body = { items: readings };
+        ctx.body = {
+            items,
+            count,
+        };
     },
 });
 
