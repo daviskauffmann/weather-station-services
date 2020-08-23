@@ -1,17 +1,29 @@
 import mongoose from 'mongoose';
 
 export interface Reading extends mongoose.Document {
-    temperature: number;
-    pressure: number;
-    humidity: number;
-    date: Date;
+    sensorId: mongoose.Types.ObjectId;
+    day: Date;
+    count: number;
+    data: {
+        timestamp: Date;
+        temperature: number;
+        humidity: number;
+        pressure: number;
+    }[];
 }
 
 const schema = new mongoose.Schema({
-    temperature: Number,
-    pressure: Number,
-    humidity: Number,
-    date: Date,
+    sensorId: mongoose.Types.ObjectId,
+    day: Date,
+    count: Number,
+    data: [new mongoose.Schema({
+        timestamp: Date,
+        temperature: Number,
+        humidity: Number,
+        pressure: Number,
+    }, {
+        _id: false,
+    })],
 });
 
 const Reading = mongoose.model<Reading>('Reading', schema);
