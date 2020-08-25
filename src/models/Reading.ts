@@ -12,7 +12,7 @@ export interface Reading extends mongoose.Document {
     }[];
 }
 
-const schema = new mongoose.Schema({
+const schema = new mongoose.Schema<Reading>({
     sensorId: mongoose.Types.ObjectId,
     day: Date,
     count: Number,

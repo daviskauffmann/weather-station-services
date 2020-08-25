@@ -9,30 +9,13 @@ const routes = router();
 const Joi = router.Joi;
 
 routes.route({
-    method: 'GET',
-    path: '/',
-    pre: passport.authenticate('headerapikey', { session: false }),
-    validate: {
-        query: {}
-    },
-    handler: async ctx => {
-        const query = Reading.find();
-        const items = await query.exec();
-        ctx.status = 200;
-        ctx.body = {
-            items,
-        };
-    },
-});
-
-routes.route({
     method: 'POST',
     path: '/',
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
         type: 'json',
         body: {
-            sensorId: Joi.string().regex(OBJECT_ID_REGEX),
+            sensorId: Joi.string().regex(OBJECT_ID_REGEX).required(),
             timestamp: Joi.number().required(),
             temperature: Joi.number().required(),
             pressure: Joi.number().required(),

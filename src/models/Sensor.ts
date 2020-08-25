@@ -5,7 +5,7 @@ export interface Sensor extends mongoose.Document {
     createdOn: Date;
 }
 
-const schema = new mongoose.Schema({
+const schema = new mongoose.Schema<Sensor>({
     name: String,
     createdOn: Date,
 });
