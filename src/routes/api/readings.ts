@@ -1,7 +1,7 @@
 import router from 'koa-joi-router';
 import passport from 'koa-passport';
 import mongoose from 'mongoose';
-import Reading from '../../models/Reading';
+import Reading, { WindDirection } from '../../models/Reading';
 import Sensor from '../../models/Sensor';
 import { OBJECT_ID_REGEX } from '../../utils/constants';
 
@@ -20,6 +20,9 @@ routes.route({
             temperature: Joi.number().required(),
             pressure: Joi.number().required(),
             humidity: Joi.number().required(),
+            windSpeed: Joi.number().required(),
+            windDirection: Joi.string().allow(Object.values(WindDirection)).required(),
+            rainfall: Joi.number().required(),
         },
     },
     handler: async ctx => {
@@ -48,6 +51,9 @@ routes.route({
                     temperature: ctx.request.body.temperature,
                     pressure: ctx.request.body.pressure,
                     humidity: ctx.request.body.humidity,
+                    windSpeed: ctx.request.body.windSpeed,
+                    windDirection: ctx.request.body.windDirection,
+                    rainfall: ctx.request.body.rainfall,
                 },
             },
             $inc: {

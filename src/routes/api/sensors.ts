@@ -12,8 +12,8 @@ routes.route({
     pre: passport.authenticate('headerapikey', { session: false }),
     validate: {
         query: {
-            createdFrom: Joi.string().isoDate().default(0),
-            createdTo: Joi.string().isoDate().default(Date.now()),
+            'createdOn gte': Joi.string().isoDate().default(0),
+            'createdOn lte': Joi.string().isoDate().default(Date.now()),
             projection: Joi.string(),
             limit: Joi.number().default(10),
             skip: Joi.number().default(0),
@@ -23,8 +23,8 @@ routes.route({
     handler: async ctx => {
         const query = Sensor.find({
             createdOn: {
-                $gte: new Date(ctx.query.createdFrom),
-                $lte: new Date(ctx.query.createdTo),
+                $gte: new Date(ctx.query['createdOn gte']),
+                $lte: new Date(ctx.query['createdOn lte']),
             },
         }, ctx.query.projection)
             .limit(ctx.query.limit)
