@@ -1,9 +1,3 @@
-import dotenv from 'dotenv';
-import sourceMapSupport from 'source-map-support';
+import 'reflect-metadata';
 
-sourceMapSupport.install();
-dotenv.config();
-
-console.log(`Application is in ${process.env.NODE_ENV} mode`);
-
-import './server';
+export * from './server';
