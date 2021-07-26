@@ -1,4 +1,4 @@
-import { envsafe, port, str } from 'envsafe';
+import { envsafe, num, port, str } from 'envsafe';
 
 export const pkg = require('../package.json');
 
@@ -18,8 +18,8 @@ export const env = envsafe({
   POSTGRES_HOST: str({
     devDefault: 'localhost',
   }),
-  POSTGRES_PORT: str({
-    devDefault: '53524',
+  POSTGRES_PORT: num({
+    devDefault: 5432,
   }),
   POSTGRES_DATABASE: str({
     devDefault: 'weather',

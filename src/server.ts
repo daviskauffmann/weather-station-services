@@ -25,6 +25,8 @@ const connectionType = 'postgres';
 
 createConnection({
     type: connectionType,
+    host: env.POSTGRES_HOST,
+    port: env.POSTGRES_PORT,
     database: env.POSTGRES_DATABASE,
     username: env.POSTGRES_USERNAME,
     password: env.POSTGRES_PASSWORD,
