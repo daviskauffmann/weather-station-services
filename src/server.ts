@@ -21,12 +21,17 @@ typeOrmUserCOntainer(Container);
 
 const log = debug(`${pkg.name}:${path.basename(__filename)}`);
 
+const connectionType = 'postgres';
+
 createConnection({
-    type: 'mongodb', // TODO: remove (probably not use mongodb)
+    type: connectionType,
+    database: env.POSTGRES_DATABASE,
+    username: env.POSTGRES_USERNAME,
+    password: env.POSTGRES_PASSWORD,
     entities: [Station],
-    useUnifiedTopology: true,
+    synchronize: true,
 }).then(async () => {
-    log(`connected to ${env.TYPEORM_CONNECTION} database "${env.TYPEORM_DATABASE}" at ${env.TYPEORM_HOST}:${env.TYPEORM_PORT}`);
+    log(`connected to ${connectionType} database "${env.POSTGRES_DATABASE}" at ${env.POSTGRES_HOST}:${env.POSTGRES_PORT}`);
 
     const app = express();
 
@@ -44,45 +49,45 @@ createConnection({
     useExpressServer(app, routingControllersOptions);
 
     // websockets
-    // createSocketServer(3001, {
-    //     controllers: [MessageController],
-    // });
+    createSocketServer(3001, {
+        controllers: [MessageController],
+    });
 
     // graphql
-    // const schema = await buildSchema({
-    //     resolvers: [StationResolver],
-    //     container: Container,
-    // });
+    const schema = await buildSchema({
+        resolvers: [StationResolver],
+        container: Container,
+    });
 
-    // app.use('/graphql', graphqlHTTP({
-    //     schema,
-    //     graphiql: env.NODE_ENV !== 'production',
-    // }));
+    app.use('/graphql', graphqlHTTP({
+        schema,
+        graphiql: env.NODE_ENV !== 'production',
+    }));
 
     // swagger
-    // const schemas = validationMetadatasToSchemas({
-    //     classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
-    //     refPointerPrefix: '#/components/schemas/',
-    // });
-    // const storage = getMetadataArgsStorage()
-    // const spec = routingControllersToSpec(storage, routingControllersOptions, {
-    //     components: {
-    //         schemas,
-    //         securitySchemes: {
-    //             basicAuth: {
-    //                 scheme: 'basic',
-    //                 type: 'http',
-    //             },
-    //         },
-    //     },
-    //     info: {
-    //         description: 'Generated with `routing-controllers-openapi`',
-    //         title: 'A sample API',
-    //         version: '1.0.0',
-    //     },
-    // });
+    const schemas = validationMetadatasToSchemas({
+        classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
+        refPointerPrefix: '#/components/schemas/',
+    });
+    const storage = getMetadataArgsStorage()
+    const spec = routingControllersToSpec(storage, routingControllersOptions, {
+        components: {
+            schemas,
+            securitySchemes: {
+                basicAuth: {
+                    scheme: 'basic',
+                    type: 'http',
+                },
+            },
+        },
+        info: {
+            description: 'Generated with `routing-controllers-openapi`',
+            title: 'A sample API',
+            version: '1.0.0',
+        },
+    });
 
-    // app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
+    app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
 
     app.listen(env.PORT, () => {
         log(`listening on port ${env.PORT}`)

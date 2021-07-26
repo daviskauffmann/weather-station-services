@@ -1,30 +1,16 @@
-import { IsOptional, IsString } from 'class-validator';
-import { ArgsType, Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm';
+import { IsNumber, IsString } from 'class-validator';
+import { Field, ObjectType } from 'type-graphql';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'stations' })
 @ObjectType()
 export class Station {
-    @ObjectIdColumn()
-    @Field(() => ID)
-    _id!: ObjectID;
+    @PrimaryGeneratedColumn()
+    @IsNumber()
+    id!: number;
 
     @Column()
     @Field()
-    name!: string;
-}
-
-@ArgsType()
-export class CreateStation {
-    @Field()
     @IsString()
     name!: string;
-}
-
-@ArgsType()
-export class UpdateStation {
-    @Field()
-    @IsString()
-    @IsOptional()
-    name?: string;
 }

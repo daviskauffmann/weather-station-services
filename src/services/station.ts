@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { FindManyOptions } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
@@ -8,26 +7,26 @@ import { StationRepository } from '../repositories/station';
 @Service()
 export class StationService {
     constructor(
-        @InjectRepository() private stationRepository: StationRepository,
+        @InjectRepository(Station) private stationRepository: StationRepository,
     ) { }
 
-    findAll(options?: FindManyOptions<Station>) {
+    async findAll(options?: FindManyOptions<Station>) {
         return this.stationRepository.find(options);
     }
 
-    findById(id: string) {
-        return this.stationRepository.findOne({ _id: new ObjectId(id) });
+    async findById(id: number) {
+        return this.stationRepository.findOne({ id });
     }
 
-    create(entity: Partial<Station>) {
+    async create(entity: Omit<Station, 'id'>) {
         return this.stationRepository.insert(entity);
     }
 
-    updateById(id: string, update: Partial<Station>) {
-        return this.stationRepository.update({ _id: new ObjectId(id) }, update);
+    async updateById(id: number, update: Partial<Omit<Station, 'id'>>) {
+        return this.stationRepository.update({ id }, update);
     }
 
-    deleteById(id: string) {
-        return this.stationRepository.delete({ _id: new ObjectId(id) });
+    async deleteById(id: number) {
+        return this.stationRepository.delete({ id });
     }
 }

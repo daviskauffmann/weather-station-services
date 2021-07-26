@@ -1,13 +1,13 @@
-import { ObjectId } from 'mongodb';
 import { Container } from 'typedi';
 import { Station } from '../../src/entities/station';
 import { StationRepository } from '../../src/repositories/station';
 import { StationService } from '../../src/services/station';
+import { StationRepositoryMock } from '../mocks/station.repository.mock';
 
 const station: Station = {
-    _id: new ObjectId() as any,
+    id: 1234,
     name: 'Test Station',
-}
+};
 
 jest.mock('typeorm-typedi-extensions', () => ({
     InjectRepository: () => () => { },
@@ -20,10 +20,7 @@ describe('Station Service', () => {
     beforeEach(async () => {
         Container.reset();
 
-        Container.set(StationRepository, {
-            find: () => { },
-            findOne: () => { },
-        });
+        Container.set(StationRepository, new StationRepositoryMock());
 
         stationService = Container.get(StationService);
         stationRepository = Container.get(StationRepository);
@@ -40,7 +37,6 @@ describe('Station Service', () => {
         await stationService.findAll(options);
 
         expect(stationRepository.find).toHaveBeenCalledWith(options);
-        expect(stationRepository.find).toHaveReturnedWith(stations);
     });
 
     test('should find one station', async () => {
@@ -48,11 +44,52 @@ describe('Station Service', () => {
             .spyOn(stationRepository, 'findOne')
             .mockImplementation(() => station as any);
 
-        await stationService.findById(station._id.toHexString());
+        await stationService.findById(station.id);
 
         expect(stationRepository.findOne).toHaveBeenCalledWith({
-            _id: station._id,
+            id: station.id,
         });
-        expect(stationRepository.findOne).toHaveReturnedWith(station);
+    });
+
+    test('should create a station', async () => {
+        jest
+            .spyOn(stationRepository, 'insert')
+            .mockImplementation(() => station as any);
+
+        const entity = {
+            name: station.name,
+        };
+
+        await stationService.create(entity);
+
+        expect(stationRepository.insert).toHaveBeenCalledWith(entity);
+    });
+
+    test('should update a station', async () => {
+        jest
+            .spyOn(stationRepository, 'update')
+            .mockImplementation(() => station as any);
+
+        const update = {
+            name: station.name,
+        };
+
+        await stationService.updateById(station.id, update);
+
+        expect(stationRepository.update).toHaveBeenCalledWith({
+            id: station.id,
+        }, update);
+    });
+
+    test('should delete a station', async () => {
+        jest
+            .spyOn(stationRepository, 'delete')
+            .mockImplementation(() => station as any);
+
+        await stationService.deleteById(station.id);
+
+        expect(stationRepository.delete).toHaveBeenCalledWith({
+            id: station.id,
+        });
     });
 });

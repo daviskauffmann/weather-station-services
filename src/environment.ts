@@ -15,18 +15,17 @@ export const env = envsafe({
     desc: 'The port the app is running on',
     example: 80,
   }),
-  TYPEORM_CONNECTION: str({
-    devDefault: 'mongodb',
-  }),
-  TYPEORM_HOST: str({
+  POSTGRES_HOST: str({
     devDefault: 'localhost',
   }),
-  TYPEORM_PORT: str({
-    devDefault: '27017',
+  POSTGRES_PORT: str({
+    devDefault: '53524',
   }),
-  TYPEORM_DATABASE: str({
+  POSTGRES_DATABASE: str({
     devDefault: 'weather',
   }),
+  POSTGRES_USERNAME: str(),
+  POSTGRES_PASSWORD: str(),
   API_KEY: str({
     devDefault: '1234',
   }),
