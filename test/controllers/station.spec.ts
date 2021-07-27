@@ -34,7 +34,7 @@ describe('Station Controller', () => {
 
         jest
             .spyOn(stationService, 'findMany')
-            .mockImplementation(() => stations as any);
+            .mockImplementation(() => ({ items: stations }) as any);
 
         await stationController.list(query, res as any);
 
@@ -44,7 +44,6 @@ describe('Station Controller', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(send).toHaveBeenCalledWith({
             items: stations,
-            total: undefined,
         });
     });
 
