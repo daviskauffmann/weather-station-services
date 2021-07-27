@@ -1,4 +1,4 @@
-import { envsafe, num, port, str } from 'envsafe';
+import { bool, envsafe, num, port, str } from 'envsafe';
 
 export const pkg = require('../package.json');
 
@@ -9,6 +9,9 @@ export const env = envsafe({
     }),
     DEBUG: str({
         default: `${pkg.name}*`,
+    }),
+    WS: bool({
+        default: false,
     }),
     PORT: port({
         default: 3000,

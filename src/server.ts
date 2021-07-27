@@ -6,7 +6,7 @@ import { printSchema } from 'graphql';
 import logger from 'morgan';
 import { getMetadataArgsStorage, RoutingControllersOptions, useContainer as rcUseContainer, useExpressServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
-import { createSocketServer } from 'socket-controllers';
+import { createSocketServer, useContainer as scUseContainer } from 'socket-controllers';
 import * as swaggerUiExpress from 'swagger-ui-express';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
@@ -20,6 +20,7 @@ import { StationResolver } from './resolvers/station';
 import updatePostmanSchema from './update-postman-schema';
 
 rcUseContainer(Container);
+scUseContainer(Container);
 typeOrmUserCOntainer(Container);
 
 const log = debug(`${pkg.name}`);
@@ -39,6 +40,7 @@ createConnection({
 }).then(async () => {
     log(`connected to ${connectionType} database "${env.POSTGRES_DATABASE}" at ${env.POSTGRES_HOST}:${env.POSTGRES_PORT}`);
 
+    // rest api
     const app = express();
 
     // request logging
@@ -48,61 +50,63 @@ createConnection({
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    // routing controllers
-    const routingControllersOptions: RoutingControllersOptions = {
-        controllers: [
-            StationController,
-        ],
-        authorizationChecker,
-    };
+    if (env.WS) {
+        // websocket server
+        createSocketServer(env.PORT, {
+            controllers: [MessageController],
+        });
+    } else {
+        // routing controllers
+        const routingControllersOptions: RoutingControllersOptions = {
+            controllers: [
+                StationController,
+            ],
+            authorizationChecker,
+        };
 
-    useExpressServer(app, routingControllersOptions);
+        useExpressServer(app, routingControllersOptions);
 
-    // websockets
-    createSocketServer(3001, {
-        controllers: [MessageController],
-    });
+        // graphql
+        const schema = await buildSchema({
+            resolvers: [StationResolver],
+            container: Container,
+            authChecker,
+        });
 
-    // graphql
-    const schema = await buildSchema({
-        resolvers: [StationResolver],
-        container: Container,
-        authChecker,
-    });
+        app.use('/graphql', graphqlHTTP({
+            schema,
+            graphiql: env.NODE_ENV !== 'production',
+        }));
 
-    updatePostmanSchema(printSchema(schema));
+        updatePostmanSchema(printSchema(schema));
 
-    app.use('/graphql', graphqlHTTP({
-        schema,
-        graphiql: env.NODE_ENV !== 'production',
-    }));
-
-    // swagger
-    const schemas = validationMetadatasToSchemas({
-        classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
-        refPointerPrefix: '#/components/schemas/',
-    });
-    const storage = getMetadataArgsStorage()
-    const spec = routingControllersToSpec(storage, routingControllersOptions, {
-        components: {
-            schemas,
-            securitySchemes: {
-                basicAuth: {
-                    scheme: 'basic',
-                    type: 'http',
+        // swagger
+        const schemas = validationMetadatasToSchemas({
+            classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
+            refPointerPrefix: '#/components/schemas/',
+        });
+        const storage = getMetadataArgsStorage()
+        const spec = routingControllersToSpec(storage, routingControllersOptions, {
+            components: {
+                schemas,
+                securitySchemes: {
+                    basicAuth: {
+                        scheme: 'basic',
+                        type: 'http',
+                    },
                 },
             },
-        },
-        info: {
-            description: 'Generated with `routing-controllers-openapi`',
-            title: 'A sample API',
-            version: '1.0.0',
-        },
-    });
+            info: {
+                description: 'Generated with `routing-controllers-openapi`',
+                title: 'A sample API',
+                version: '1.0.0',
+            },
+        });
 
-    app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
+        app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
 
-    app.listen(env.PORT, () => {
-        log(`listening on port ${env.PORT}`)
-    });
+        app.listen(env.PORT, () => {
+            log(`listening on port ${env.PORT}`);
+        });
+    }
 });

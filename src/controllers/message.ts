@@ -1,6 +1,8 @@
 import { ConnectedSocket, MessageBody, OnConnect, OnDisconnect, OnMessage, SocketController } from 'socket-controllers';
+import { Service } from 'typedi';
 
 @SocketController()
+@Service()
 export class MessageController {
     @OnConnect()
     connection(@ConnectedSocket() socket: any) {
