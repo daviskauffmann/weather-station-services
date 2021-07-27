@@ -6,6 +6,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @ObjectType()
 export class Station {
     @PrimaryGeneratedColumn()
+    @Field()
     @IsNumber()
     id!: number;
 

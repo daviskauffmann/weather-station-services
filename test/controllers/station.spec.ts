@@ -24,6 +24,7 @@ describe('Station Controller', () => {
 
     test('should find all stations', async () => {
         const stations = [station];
+        const query = {};
         const send = jest.fn();
         const res = {
             status: jest.fn(() => ({
@@ -32,14 +33,19 @@ describe('Station Controller', () => {
         };
 
         jest
-            .spyOn(stationService, 'findAll')
+            .spyOn(stationService, 'findMany')
             .mockImplementation(() => stations as any);
 
-        await stationController.list(res as any);
+        await stationController.list(query, res as any);
 
-        expect(stationService.findAll).toHaveBeenCalled();
+        expect(stationService.findMany).toHaveBeenCalledWith({
+            name: undefined,
+        }, undefined, undefined, undefined);
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(send).toHaveBeenCalledWith(stations);
+        expect(send).toHaveBeenCalledWith({
+            items: stations,
+            total: undefined,
+        });
     });
 
     test('should find a station', async () => {

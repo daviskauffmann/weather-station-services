@@ -2,7 +2,8 @@ import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import debug from 'debug';
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
-import * as path from 'path';
+import { printSchema } from 'graphql';
+import logger from 'morgan';
 import { getMetadataArgsStorage, RoutingControllersOptions, useContainer as rcUseContainer, useExpressServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { createSocketServer } from 'socket-controllers';
@@ -10,16 +11,19 @@ import * as swaggerUiExpress from 'swagger-ui-express';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
 import { createConnection, useContainer as typeOrmUserCOntainer } from 'typeorm';
+import { authChecker, authorizationChecker } from './auth';
 import { MessageController } from './controllers/message';
 import { StationController } from './controllers/station';
 import { Station } from './entities/station';
 import { env, pkg } from './environment';
 import { StationResolver } from './resolvers/station';
+import updatePostmanSchema from './update-postman-schema';
 
 rcUseContainer(Container);
 typeOrmUserCOntainer(Container);
 
-const log = debug(`${pkg.name}:${path.basename(__filename)}`);
+const log = debug(`${pkg.name}`);
+const error = debug(`${pkg.name}:error`);
 
 const connectionType = 'postgres';
 
@@ -27,15 +31,18 @@ createConnection({
     type: connectionType,
     host: env.POSTGRES_HOST,
     port: env.POSTGRES_PORT,
-    database: env.POSTGRES_DATABASE,
     username: env.POSTGRES_USERNAME,
     password: env.POSTGRES_PASSWORD,
+    database: env.POSTGRES_DATABASE,
     entities: [Station],
     synchronize: true,
 }).then(async () => {
     log(`connected to ${connectionType} database "${env.POSTGRES_DATABASE}" at ${env.POSTGRES_HOST}:${env.POSTGRES_PORT}`);
 
     const app = express();
+
+    // request logging
+    app.use(logger(env.LOG_FORMAT));
 
     // body parser
     app.use(express.json());
@@ -46,6 +53,7 @@ createConnection({
         controllers: [
             StationController,
         ],
+        authorizationChecker,
     };
 
     useExpressServer(app, routingControllersOptions);
@@ -59,7 +67,10 @@ createConnection({
     const schema = await buildSchema({
         resolvers: [StationResolver],
         container: Container,
+        authChecker,
     });
+
+    updatePostmanSchema(printSchema(schema));
 
     app.use('/graphql', graphqlHTTP({
         schema,

@@ -28,15 +28,19 @@ describe('Station Service', () => {
 
     test('should find all stations', async () => {
         const stations = [station];
-        const options = {};
+        const findConditions = {};
 
         jest
             .spyOn(stationRepository, 'find')
             .mockImplementation(() => stations as any);
 
-        await stationService.findAll(options);
+        await stationService.findMany(findConditions);
 
-        expect(stationRepository.find).toHaveBeenCalledWith(options);
+        expect(stationRepository.find).toHaveBeenCalledWith({
+            where: findConditions,
+            take: undefined,
+            skip: 0,
+        });
     });
 
     test('should find one station', async () => {

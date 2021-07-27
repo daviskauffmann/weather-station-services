@@ -1,5 +1,5 @@
 export class StationServiceMock {
-    findAll() { }
+    findMany() { }
     findById() { }
     create() { }
     updateById() { }

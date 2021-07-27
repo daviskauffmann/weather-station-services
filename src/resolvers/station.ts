@@ -1,8 +1,8 @@
-import { Arg, Args, Query, Resolver } from 'type-graphql';
+import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
 import { Station } from '../entities/station';
 import { StationService } from '../services/station';
-import { CreateStation, UpdateStation } from '../types/station';
+import { CreateStationRequest, ListStationsResponse, ListStationsRequest, UpdateStationRequest } from '../types/station';
 
 @Service()
 @Resolver(() => Station)
@@ -11,34 +11,43 @@ export class StationResolver {
         private stationService: StationService,
     ) { }
 
-    @Query(() => [Station])
-    async listStations() {
-        return this.stationService.findAll();
+    @Authorized()
+    @Query(() => ListStationsResponse)
+    async stations(
+        @Args() args: ListStationsRequest,
+    ) {
+        return this.stationService.findMany({
+            name: args.name,
+        }, args.total, args.pageSize, args.pageNumber);
     }
 
+    @Authorized()
     @Query(() => Station, { nullable: true })
-    async getStation(
+    async station(
         @Arg('id') id: number,
     ) {
         return this.stationService.findById(id);
     }
 
-    @Query(() => Station)
+    @Authorized()
+    @Mutation(() => Station)
     async createStation(
-        @Args() station: CreateStation,
+        @Args() station: CreateStationRequest,
     ) {
         return this.stationService.create(station);
     }
 
-    @Query(() => Station)
+    @Authorized()
+    @Mutation(() => Station)
     async updateStation(
-        @Args() station: UpdateStation,
+        @Args() station: UpdateStationRequest,
         @Arg('id') id: number,
     ) {
         return this.stationService.updateById(id, station);
     }
 
-    @Query(() => Station)
+    @Authorized()
+    @Mutation(() => Station)
     async deleteStation(
         @Arg('id') id: number,
     ) {

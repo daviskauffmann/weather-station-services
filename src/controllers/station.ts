@@ -1,15 +1,10 @@
-import debug from 'debug';
-import { Request, Response } from 'express';
-import * as path from 'path';
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Req, Res } from 'routing-controllers';
+import { Response } from 'express';
+import { Authorized, Body, Controller, Delete, Get, Param, Post, Put, QueryParams, Res } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import { Station } from '../entities/station';
-import { pkg } from '../environment';
 import { StationService } from '../services/station';
-import { CreateStation, UpdateStation } from '../types/station';
-
-const log = debug(`${pkg.name}:${path.basename(__filename)}`);
+import { CreateStationRequest, ListStationsResponse, ListStationsRequest, UpdateStationRequest } from '../types/station';
 
 @Controller('/api/stations')
 @Service()
@@ -18,23 +13,27 @@ export class StationController {
         private stationService: StationService,
     ) { }
 
+    @Authorized()
     @Get()
     @OpenAPI({
         summary: 'List',
-        description: 'List all stations',
+        description: 'List stations',
     })
-    @ResponseSchema(Station, {
+    @ResponseSchema(ListStationsResponse, {
         description: 'Stations',
         statusCode: 200,
-        isArray: true,
     })
     async list(
+        @QueryParams() query: ListStationsRequest,
         @Res() res: Response,
     ) {
-        const stations = await this.stationService.findAll();
-        return res.status(200).send(stations);
+        const result = await this.stationService.findMany({
+            name: query.name,
+        }, query.total, query.pageSize, query.pageNumber);
+        return res.status(200).send(result);
     }
 
+    @Authorized()
     @Get('/:id')
     @OpenAPI({
         summary: 'Get',
@@ -52,6 +51,7 @@ export class StationController {
         return res.status(200).send(station);
     }
 
+    @Authorized()
     @Post()
     @OpenAPI({
         summary: 'Create',
@@ -62,13 +62,14 @@ export class StationController {
         statusCode: 201,
     })
     async create(
-        @Body() body: CreateStation,
+        @Body() body: CreateStationRequest,
         @Res() res: Response,
     ) {
         const station = await this.stationService.create(body);
         return res.status(201).send(station);
     }
 
+    @Authorized()
     @Put('/:id')
     @OpenAPI({
         summary: 'Update',
@@ -80,13 +81,14 @@ export class StationController {
     })
     async update(
         @Param('id') id: number,
-        @Body() body: UpdateStation,
+        @Body() body: UpdateStationRequest,
         @Res() res: Response,
     ) {
         const station = await this.stationService.updateById(id, body);
         return res.status(200).send(station);
     }
 
+    @Authorized()
     @Delete('/:id')
     @OpenAPI({
         summary: 'Delete',
