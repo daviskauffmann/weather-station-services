@@ -3,8 +3,8 @@ import { Action } from 'routing-controllers';
 import { AuthChecker } from 'type-graphql';
 import { env } from './environment';
 
-function checkAuth(token?: string, roles?: string[]) {
-    if (token !== env.API_KEY) {
+function checkAuth(apiKey?: string, roles?: string[]) {
+    if (apiKey !== env.API_KEY) {
         return false;
     }
 
@@ -12,9 +12,9 @@ function checkAuth(token?: string, roles?: string[]) {
 }
 
 export async function authorizationChecker(action: Action, roles: string[]) {
-    return checkAuth((action.request as Request).headers.authorization, roles);
+    return checkAuth((action.request as Request).headers['x-api-key'] as string, roles);
 }
 
 export const authChecker: AuthChecker<Request> = (data, roles) => {
-    return checkAuth(data.context.headers.authorization, roles);
+    return checkAuth(data.context.headers['x-api-key'] as string, roles);
 };

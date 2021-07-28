@@ -3,15 +3,21 @@ import { Field, ObjectType } from 'type-graphql';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'stations' })
-@ObjectType()
+@ObjectType({
+    description: 'Station',
+})
 export class Station {
     @PrimaryGeneratedColumn()
-    @Field()
+    @Field({
+        description: 'ID',
+    })
     @IsNumber()
     id!: number;
 
     @Column()
-    @Field()
+    @Field({
+        description: 'Name',
+    })
     @IsString()
     name!: string;
 }

@@ -9,7 +9,6 @@ export class StationService extends DataService<Station> {
     constructor(
         @InjectRepository(Station) private stationRepository: StationRepository,
     ) {
-        super();
-        this.defaultRepository = stationRepository;
+        super(stationRepository);
     }
 }

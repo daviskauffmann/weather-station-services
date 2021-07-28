@@ -1,10 +1,9 @@
-import { Response } from 'express';
-import { Authorized, Body, Controller, Delete, Get, Param, Post, Put, QueryParams, Res } from 'routing-controllers';
+import { Authorized, Body, Controller, Delete, Get, HttpCode, NotFoundError, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import { Station } from '../entities/station';
 import { StationService } from '../services/station';
-import { CreateStationRequest, ListStationsResponse, ListStationsRequest, UpdateStationRequest } from '../types/station';
+import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/station';
 
 @Controller('/api/stations')
 @Service()
@@ -25,12 +24,28 @@ export class StationController {
     })
     async list(
         @QueryParams() query: ListStationsRequest,
-        @Res() res: Response,
     ) {
-        const result = await this.stationService.findMany({
+        return this.stationService.findMany({
             name: query.name,
         }, query.total, query.pageSize, query.pageNumber);
-        return res.status(200).send(result);
+    }
+
+    @Authorized()
+    @Post()
+    @HttpCode(201)
+    @OpenAPI({
+        summary: 'Create',
+        description: 'Create station',
+        responses: {
+            201: {
+                description: 'Station created',
+            },
+        },
+    })
+    async create(
+        @Body() body: CreateStationRequest,
+    ) {
+        await this.stationService.create(body);
     }
 
     @Authorized()
@@ -38,6 +53,18 @@ export class StationController {
     @OpenAPI({
         summary: 'Get',
         description: 'Get station',
+        parameters: [
+            {
+                name: 'id',
+                in: 'path',
+                description: 'Station ID',
+            },
+        ],
+        responses: {
+            404: {
+                description: 'Station not found',
+            },
+        },
     })
     @ResponseSchema(Station, {
         description: 'Station',
@@ -45,28 +72,12 @@ export class StationController {
     })
     async get(
         @Param('id') id: number,
-        @Res() res: Response,
     ) {
         const station = await this.stationService.findById(id);
-        return res.status(200).send(station);
-    }
-
-    @Authorized()
-    @Post()
-    @OpenAPI({
-        summary: 'Create',
-        description: 'Create station',
-    })
-    @ResponseSchema(Station, {
-        description: 'Station created',
-        statusCode: 201,
-    })
-    async create(
-        @Body() body: CreateStationRequest,
-        @Res() res: Response,
-    ) {
-        const station = await this.stationService.create(body);
-        return res.status(201).send(station);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+        return station;
     }
 
     @Authorized()
@@ -74,18 +85,24 @@ export class StationController {
     @OpenAPI({
         summary: 'Update',
         description: 'Update station',
-    })
-    @ResponseSchema(Station, {
-        description: 'Station updated',
-        statusCode: 200,
+        parameters: [
+            {
+                name: 'id',
+                in: 'path',
+                description: 'Station ID',
+            },
+        ],
+        responses: {
+            200: {
+                description: 'Station updated',
+            },
+        },
     })
     async update(
         @Param('id') id: number,
         @Body() body: UpdateStationRequest,
-        @Res() res: Response,
     ) {
-        const station = await this.stationService.updateById(id, body);
-        return res.status(200).send(station);
+        await this.stationService.updateById(id, body);
     }
 
     @Authorized()
@@ -93,16 +110,22 @@ export class StationController {
     @OpenAPI({
         summary: 'Delete',
         description: 'Delete station',
-    })
-    @ResponseSchema(Station, {
-        description: 'Station deleted',
-        statusCode: 200,
+        parameters: [
+            {
+                name: 'id',
+                in: 'path',
+                description: 'Station ID',
+            },
+        ],
+        responses: {
+            200: {
+                description: 'Station deleted',
+            },
+        },
     })
     async delete(
         @Param('id') id: number,
-        @Res() res: Response,
     ) {
-        const station = await this.stationService.deleteById(id);
-        return res.status(200).send(station);
+        await this.stationService.deleteById(id);
     }
 }

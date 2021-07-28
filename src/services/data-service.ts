@@ -9,7 +9,9 @@ export interface FindManyResult<T extends ObjectLiteral> {
 }
 
 export abstract class DataService<T extends ObjectLiteral> {
-    protected defaultRepository!: Repository<T>;
+    constructor(
+        protected defaultRepository: Repository<T>
+    ) { }
 
     async findMany(findConditions: FindConditions<T>, total?: boolean, pageSize?: number, pageNumber?: number): Promise<FindManyResult<T>> {
         const where = findConditions;
@@ -49,14 +51,18 @@ export abstract class DataService<T extends ObjectLiteral> {
     }
 
     async create(entity: QueryDeepPartialEntity<T>) {
-        return this.defaultRepository.insert(entity);
+        await this.defaultRepository.insert(entity);
     }
 
     async updateById(id: number, update: QueryDeepPartialEntity<T>) {
-        return this.defaultRepository.update({ id }, update);
+        await this.defaultRepository.update({ id }, update);
+    }
+
+    async deleteMany(findConditions: FindConditions<T>) {
+        await this.defaultRepository.delete(findConditions);
     }
 
     async deleteById(id: number) {
-        return this.defaultRepository.delete({ id });
+        await this.defaultRepository.delete({ id });
     }
 }

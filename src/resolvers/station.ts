@@ -2,7 +2,7 @@ import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
 import { Station } from '../entities/station';
 import { StationService } from '../services/station';
-import { CreateStationRequest, ListStationsResponse, ListStationsRequest, UpdateStationRequest } from '../types/station';
+import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/station';
 
 @Service()
 @Resolver(() => Station)
@@ -12,7 +12,9 @@ export class StationResolver {
     ) { }
 
     @Authorized()
-    @Query(() => ListStationsResponse)
+    @Query(() => ListStationsResponse, {
+        description: 'List stations',
+    })
     async stations(
         @Args() args: ListStationsRequest,
     ) {
@@ -22,35 +24,53 @@ export class StationResolver {
     }
 
     @Authorized()
-    @Query(() => Station, { nullable: true })
+    @Query(() => Station, {
+        description: 'Get station',
+        nullable: true,
+    })
     async station(
-        @Arg('id') id: number,
+        @Arg('id', {
+            description: 'Station ID',
+        }) id: number,
     ) {
         return this.stationService.findById(id);
     }
 
     @Authorized()
-    @Mutation(() => Station)
+    @Mutation(() => Boolean, {
+        description: 'Create station',
+    })
     async createStation(
         @Args() station: CreateStationRequest,
     ) {
-        return this.stationService.create(station);
+        await this.stationService.create(station);
+        return true;
     }
 
     @Authorized()
-    @Mutation(() => Station)
+    @Mutation(() => Boolean, {
+        description: 'Update station',
+    })
     async updateStation(
-        @Args() station: UpdateStationRequest,
-        @Arg('id') id: number,
+        @Arg('id', {
+            description: 'Station ID',
+        }) id: number,
+        @Args() update: UpdateStationRequest,
     ) {
-        return this.stationService.updateById(id, station);
+        await this.stationService.updateById(id, update);
+        return true;
     }
 
     @Authorized()
-    @Mutation(() => Station)
+    @Mutation(() => Boolean, {
+        description: 'Delete station',
+    })
     async deleteStation(
-        @Arg('id') id: number,
+        @Arg('id', {
+            description: 'Station ID',
+        }) id: number,
     ) {
-        return this.stationService.deleteById(id);
+        await this.stationService.deleteById(id);
+        return true;
     }
 }

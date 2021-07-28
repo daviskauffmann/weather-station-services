@@ -1,21 +1,26 @@
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import debug from 'debug';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { printSchema } from 'graphql';
 import logger from 'morgan';
-import { getMetadataArgsStorage, RoutingControllersOptions, useContainer as rcUseContainer, useExpressServer } from 'routing-controllers';
+import { getMetadataArgsStorage, HttpError, RoutingControllersOptions, useContainer as rcUseContainer, useExpressServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { createSocketServer, useContainer as scUseContainer } from 'socket-controllers';
 import * as swaggerUiExpress from 'swagger-ui-express';
 import { buildSchema } from 'type-graphql';
-import { Container } from 'typedi';
-import { createConnection, useContainer as typeOrmUserCOntainer } from 'typeorm';
+import { Container, Token } from 'typedi';
+import { createConnection, getManager, ObjectLiteral, useContainer as typeOrmUserCOntainer } from 'typeorm';
 import { authChecker, authorizationChecker } from './auth';
 import { MessageController } from './controllers/message';
+import { ReadingController } from './controllers/reading';
 import { StationController } from './controllers/station';
+import { Reading } from './entities/reading';
 import { Station } from './entities/station';
 import { env, pkg } from './environment';
+import { BaseRepository } from './repositories/base-repository';
+import { ReadingRepository } from './repositories/Reading';
+import { StationRepository } from './repositories/station';
 import { StationResolver } from './resolvers/station';
 import updatePostmanSchema from './update-postman-schema';
 
@@ -35,9 +40,21 @@ createConnection({
     username: env.POSTGRES_USERNAME,
     password: env.POSTGRES_PASSWORD,
     database: env.POSTGRES_DATABASE,
-    entities: [Station],
+    entities: [
+        Reading,
+        Station,
+    ],
     synchronize: true,
 }).then(async () => {
+    // init timescaledb
+    await getManager().query(`CREATE EXTENSION IF NOT EXISTS timescaledb`);
+
+    // init repositories
+    await Promise.all(([
+        ReadingRepository,
+        StationRepository,
+    ] as Token<BaseRepository<ObjectLiteral>>[]).map(Repository => Container.get(Repository).init()));
+
     log(`connected to ${connectionType} database "${env.POSTGRES_DATABASE}" at ${env.POSTGRES_HOST}:${env.POSTGRES_PORT}`);
 
     // rest api
@@ -53,22 +70,28 @@ createConnection({
     if (env.WS) {
         // websocket server
         createSocketServer(env.PORT, {
-            controllers: [MessageController],
+            controllers: [
+                MessageController,
+            ],
         });
     } else {
         // routing controllers
         const routingControllersOptions: RoutingControllersOptions = {
             controllers: [
+                ReadingController,
                 StationController,
             ],
             authorizationChecker,
+            defaultErrorHandler: false,
         };
 
         useExpressServer(app, routingControllersOptions);
 
         // graphql
         const schema = await buildSchema({
-            resolvers: [StationResolver],
+            resolvers: [
+                StationResolver,
+            ],
             container: Container,
             authChecker,
         });
@@ -90,9 +113,10 @@ createConnection({
             components: {
                 schemas,
                 securitySchemes: {
-                    basicAuth: {
-                        scheme: 'basic',
-                        type: 'http',
+                    apiKey: {
+                        type: 'apiKey',
+                        in: 'header',
+                        name: 'x-api-key',
                     },
                 },
             },
@@ -104,6 +128,10 @@ createConnection({
         });
 
         app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
+
+        app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
+            res.status(err.httpCode || 500).send(err);
+        });
 
         app.listen(env.PORT, () => {
             log(`listening on port ${env.PORT}`);

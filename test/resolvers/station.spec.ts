@@ -1,7 +1,6 @@
-import { NotFoundError } from 'routing-controllers';
 import { Container } from 'typedi';
-import { StationController } from '../../src/controllers/station';
 import { Station } from '../../src/entities/station';
+import { StationResolver } from '../../src/resolvers/station';
 import { StationService } from '../../src/services/station';
 import { StationServiceMock } from '../mocks/station.service.mock';
 
@@ -10,9 +9,9 @@ const station: Station = {
     name: 'Test Station',
 }
 
-describe('Station Controller', () => {
+describe('Station Resolver', () => {
     let stationService: StationService;
-    let stationController: StationController;
+    let stationResolver: StationResolver;
 
     beforeEach(async () => {
         Container.reset();
@@ -20,7 +19,7 @@ describe('Station Controller', () => {
         Container.set(StationService, new StationServiceMock());
 
         stationService = Container.get(StationService);
-        stationController = Container.get(StationController);
+        stationResolver = Container.get(StationResolver);
     });
 
     test('should list stations', async () => {
@@ -31,7 +30,7 @@ describe('Station Controller', () => {
             .spyOn(stationService, 'findMany')
             .mockImplementation(() => ({ items: stations }) as any);
 
-        const result = await stationController.list(query);
+        const result = await stationResolver.stations(query);
 
         expect(stationService.findMany).toHaveBeenCalledWith({
             name: undefined,
@@ -41,27 +40,12 @@ describe('Station Controller', () => {
         });
     });
 
-    test('should create a station', async () => {
-        jest
-            .spyOn(stationService, 'create')
-            .mockImplementation(() => undefined as any);
-
-        const body = {
-            name: station.name,
-        };
-
-        const result = await stationController.create(body);
-
-        expect(stationService.create).toHaveBeenCalledWith(body);
-        expect(result).toEqual(undefined);
-    });
-
     test('should get a station by id', async () => {
         jest
             .spyOn(stationService, 'findById')
             .mockImplementation(() => station as any);
 
-        const result = await stationController.get(station.id);
+        const result = await stationResolver.station(station.id);
 
         expect(stationService.findById).toHaveBeenCalledWith(station.id);
         expect(result).toEqual(station);
@@ -73,19 +57,29 @@ describe('Station Controller', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => undefined as any);
 
-        try {
-            await stationController.get(station.id);
-        } catch (err) {
-            expect(err).toBeInstanceOf(NotFoundError);
-            expect(err.httpCode).toEqual(404);
-            expect(err.message).toEqual(`Station "${station.id}" not found`);
-        }
+        const result = await stationResolver.station(station.id);
 
         expect(stationService.findById).toHaveBeenCalledWith(station.id);
+        expect(result).toEqual(undefined);
+    });
+
+    test('should create a station', async () => {
+        jest
+            .spyOn(stationService, 'create')
+            .mockImplementation(() => station as any);
+
+        const entity = {
+            name: station.name,
+        };
+
+        const result = await stationResolver.createStation(entity);
+
+        expect(stationService.create).toHaveBeenCalledWith(entity);
+        expect(result).toEqual(true);
     });
 
     test('should update a station', async () => {
-        const body = {
+        const update = {
             name: station.name,
         };
 
@@ -93,10 +87,10 @@ describe('Station Controller', () => {
             .spyOn(stationService, 'updateById')
             .mockImplementation(() => undefined as any);
 
-        const result = await stationController.update(station.id, body);
+        const result = await stationResolver.updateStation(station.id, update);
 
-        expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
-        expect(result).toEqual(undefined);
+        expect(stationService.updateById).toHaveBeenCalledWith(station.id, update);
+        expect(result).toEqual(true);
     });
 
     test('should delete a station', async () => {
@@ -104,9 +98,9 @@ describe('Station Controller', () => {
             .spyOn(stationService, 'deleteById')
             .mockImplementation(() => undefined as any);
 
-        const result = await stationController.delete(station.id);
+        const result = await stationResolver.deleteStation(station.id);
 
         expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
-        expect(result).toEqual(undefined);
+        expect(result).toEqual(true);
     });
 });
