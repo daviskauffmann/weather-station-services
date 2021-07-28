@@ -19,7 +19,7 @@ import { Reading } from './entities/reading';
 import { Station } from './entities/station';
 import { env, pkg } from './environment';
 import { BaseRepository } from './repositories/base-repository';
-import { ReadingRepository } from './repositories/Reading';
+import { ReadingRepository } from './repositories/reading';
 import { StationRepository } from './repositories/station';
 import { StationResolver } from './resolvers/station';
 import updatePostmanSchema from './update-postman-schema';

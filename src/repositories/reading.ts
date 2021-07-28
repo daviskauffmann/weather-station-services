@@ -9,7 +9,7 @@ export class ReadingRepository extends TimescaleRepository<Reading> {
     tableName = 'readings';
 
     async averageTemperatureTotal() {
-        const result = await getManager().query(`
+        const result: any[] = await getManager().query(`
             SELECT
                 station_id,
                 avg(temperature)
@@ -17,34 +17,44 @@ export class ReadingRepository extends TimescaleRepository<Reading> {
             WHERE time > now() - INTERVAL '2 years'
             GROUP BY station_id
         `);
-        return result;
+        return result.map(row => {
+            return row;
+        });
     }
 
     async averageTemperatureInterval() {
-        const result = await getManager().query(`
+        const result: any[] = await getManager().query(`
             SELECT 
-                time_bucket('15 days', time),
+                time_bucket('15 days', time) as bucket,
                 station_id,
                 avg(temperature)
             FROM readings
             WHERE time > now() - INTERVAL '6 months'
-            GROUP BY time_bucket, station_id
-            ORDER BY time_bucket DESC
+            GROUP BY bucket, station_id
+            ORDER BY bucket DESC
         `);
-        return result;
+        return result.map(row => {
+            return row;
+        });
     }
 
     async sumRainInterval() {
-        const result = await getManager().query(`
+        const result: any[] = await getManager().query(`
             SELECT
-                time_bucket_gapfill('30 days', time),
+                time_bucket_gapfill('30 days', time) as bucket,
                 station_id,
                 sum(rain_1h)
             FROM readings
             WHERE time > now() - INTERVAL '1 year' AND time < now()
-            GROUP BY time_bucket_gapfill, station_id
-            ORDER BY time_bucket_gapfill DESC
+            GROUP BY bucket, station_id
+            ORDER BY bucket DESC
         `);
-        return result;
+        return result.map(row => {
+            return {
+                bucket: row.bucket,
+                stationId: row.station_id,
+                sum: row.sum,
+            };
+        });
     }
 }

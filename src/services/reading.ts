@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import { Reading } from '../entities/Reading';
-import { ReadingRepository } from '../repositories/Reading';
+import { Reading } from '../entities/reading';
+import { ReadingRepository } from '../repositories/reading';
 import { DataService } from './data-service';
 
 @Service()
@@ -13,7 +13,7 @@ export class ReadingService extends DataService<Reading> {
     }
 
     async search() {
-        const items = await this.readingRepository.sumRainInterval();
+        const items = await this.readingRepository.averageTemperatureInterval();
 
         return {
             items,
