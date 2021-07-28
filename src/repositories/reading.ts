@@ -18,7 +18,10 @@ export class ReadingRepository extends TimescaleRepository<Reading> {
             GROUP BY station_id
         `);
         return result.map(row => {
-            return row;
+            return {
+                stationId: row.station_id,
+                avg: row.avg,
+            };
         });
     }
 
@@ -31,10 +34,14 @@ export class ReadingRepository extends TimescaleRepository<Reading> {
             FROM readings
             WHERE time > now() - INTERVAL '6 months'
             GROUP BY bucket, station_id
-            ORDER BY bucket DESC
+            ORDER BY bucket
         `);
         return result.map(row => {
-            return row;
+            return {
+                bucket: row.bucket,
+                stationId: row.station_id,
+                avg: row.avg,
+            };
         });
     }
 
@@ -47,7 +54,7 @@ export class ReadingRepository extends TimescaleRepository<Reading> {
             FROM readings
             WHERE time > now() - INTERVAL '1 year' AND time < now()
             GROUP BY bucket, station_id
-            ORDER BY bucket DESC
+            ORDER BY bucket
         `);
         return result.map(row => {
             return {
