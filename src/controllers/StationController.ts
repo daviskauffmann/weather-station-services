@@ -1,26 +1,27 @@
-import { Authorized, Body, Controller, Delete, Get, HttpCode, NotFoundError, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, ContentType, Delete, Get, HttpCode, JsonController, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
-import { Station } from '../entities/station';
-import { StationService } from '../services/station';
-import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/station';
+import Station from '../entities/Station';
+import StationService from '../services/StationService';
+import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
 
-@Controller('/api/stations')
+@JsonController('/api/stations')
 @Service()
-export class StationController {
+export default class StationController {
     constructor(
         private stationService: StationService,
     ) { }
 
     @Authorized()
     @Get()
+    @HttpCode(200)
+    @ContentType('application/json')
     @OpenAPI({
         summary: 'List',
         description: 'List stations',
     })
     @ResponseSchema(ListStationsResponse, {
         description: 'Stations',
-        statusCode: 200,
     })
     async list(
         @QueryParams() query: ListStationsRequest,

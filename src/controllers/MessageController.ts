@@ -3,7 +3,7 @@ import { Service } from 'typedi';
 
 @SocketController()
 @Service()
-export class MessageController {
+export default class MessageController {
     @OnConnect()
     connection(@ConnectedSocket() socket: any) {
         console.log('client connected');

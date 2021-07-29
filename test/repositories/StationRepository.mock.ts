@@ -1,4 +1,4 @@
-export class StationRepositoryMock {
+export default class StationRepositoryMock {
     find() { }
     findAndCount() { }
     findOne() { }

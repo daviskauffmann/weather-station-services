@@ -1,6 +1,6 @@
-import { bool, envsafe, num, port, str } from 'envsafe';
+import { envsafe, num, port, str } from 'envsafe';
 
-export const pkg = require('../package.json');
+export const pkg = require('../../package.json');
 
 export const env = envsafe({
     NODE_ENV: str({
@@ -41,15 +41,27 @@ export const env = envsafe({
         default: '',
         allowEmpty: true,
     }),
-    POSTMAN_API_ID: str({
+    POSTMAN_REST_API_ID: str({
         default: '',
         allowEmpty: true,
     }),
-    POSTMAN_API_VERSION_ID: str({
+    POSTMAN_REST_VERSION_ID: str({
         default: '',
         allowEmpty: true,
     }),
-    POSTMAN_SCHEMA_ID: str({
+    POSTMAN_REST_SCHEMA_ID: str({
+        default: '',
+        allowEmpty: true,
+    }),
+    POSTMAN_GRAPHQL_API_ID: str({
+        default: '',
+        allowEmpty: true,
+    }),
+    POSTMAN_GRAPHQL_VERSION_ID: str({
+        default: '',
+        allowEmpty: true,
+    }),
+    POSTMAN_GRAPHQL_SCHEMA_ID: str({
         default: '',
         allowEmpty: true,
     }),

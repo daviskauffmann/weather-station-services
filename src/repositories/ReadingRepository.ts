@@ -1,12 +1,14 @@
 import { Service } from 'typedi';
 import { EntityRepository, getManager } from 'typeorm';
-import { Reading } from '../entities/reading';
-import { TimescaleRepository } from './timescale-repository';
+import Reading from '../entities/Reading';
+import TimescaleRepository from './TimescaleRepository';
 
 @Service()
 @EntityRepository(Reading)
-export class ReadingRepository extends TimescaleRepository<Reading> {
-    tableName = 'readings';
+export default class ReadingRepository extends TimescaleRepository<Reading> {
+    constructor() {
+        super('readings');
+    }
 
     async averageTemperatureTotal() {
         const result: any[] = await getManager().query(`

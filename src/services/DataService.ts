@@ -1,14 +1,8 @@
 import { FindConditions, ObjectLiteral, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import FindManyResult from '../types/FindManyResult';
 
-export interface FindManyResult<T extends ObjectLiteral> {
-    items: T[];
-    total?: number;
-    pageSize?: number;
-    pageNumber?: number;
-}
-
-export abstract class DataService<T extends ObjectLiteral> {
+export default abstract class DataService<T extends ObjectLiteral> {
     constructor(
         protected defaultRepository: Repository<T>
     ) { }

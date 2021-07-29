@@ -1,9 +1,9 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ArgsType, Field, Int, ObjectType } from 'type-graphql';
-import { Station } from '../entities/station';
-import { FindManyResult } from '../services/data-service';
-import { ListRequest } from './list-request';
+import Station from '../entities/Station';
+import FindManyResult from './FindManyResult';
+import ListRequest from './ListRequest';
 
 @ArgsType()
 export class ListStationsRequest extends ListRequest {

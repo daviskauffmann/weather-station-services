@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import { Reading } from '../entities/reading';
-import { ReadingRepository } from '../repositories/reading';
-import { DataService } from './data-service';
+import Reading from '../entities/Reading';
+import ReadingRepository from '../repositories/ReadingRepository';
+import DataService from './DataService';
 
 @Service()
-export class ReadingService extends DataService<Reading> {
+export default class ReadingService extends DataService<Reading> {
     constructor(
         @InjectRepository(Reading) private readingRepository: ReadingRepository,
     ) {

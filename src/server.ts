@@ -5,6 +5,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { printSchema } from 'graphql';
 import helmet from 'helmet';
+import { js as beautify } from 'js-beautify';
 import logger from 'morgan';
 import { getMetadataArgsStorage, HttpError, RoutingControllersOptions, useContainer as rcUseContainer, useExpressServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
@@ -13,19 +14,19 @@ import * as swaggerUiExpress from 'swagger-ui-express';
 import { buildSchema } from 'type-graphql';
 import { Container, Token } from 'typedi';
 import { createConnection, getManager, ObjectLiteral, useContainer as typeOrmUserCOntainer } from 'typeorm';
-import { authChecker, authorizationChecker } from './auth';
-import { MessageController } from './controllers/message';
-import { ReadingController } from './controllers/reading';
-import { StationController } from './controllers/station';
-import { Reading } from './entities/reading';
-import { Station } from './entities/station';
-import { env, pkg } from './environment';
-import { BaseRepository } from './repositories/base-repository';
-import { ReadingRepository } from './repositories/reading';
-import { StationRepository } from './repositories/station';
-import { ReadingResolver } from './resolvers/reading';
-import { StationResolver } from './resolvers/station';
-import updatePostmanSchema from './update-postman-schema';
+import MessageController from './controllers/MessageController';
+import ReadingController from './controllers/ReadingController';
+import StationController from './controllers/StationController';
+import Reading from './entities/Reading';
+import Station from './entities/Station';
+import BaseRepository from './repositories/BaseRepository';
+import ReadingRepository from './repositories/ReadingRepository';
+import StationRepository from './repositories/StationRepository';
+import ReadingResolver from './resolvers/ReadingResolver';
+import StationResolver from './resolvers/StationResolver';
+import checkAuth from './utils/checkAuth';
+import { env, pkg } from './utils/environment';
+import updatePostman from './utils/updatePostman';
 
 // TODO: apparently typedi update broke this
 // https://github.com/typestack/class-validator/issues/928
@@ -85,7 +86,7 @@ createConnection({
             ReadingController,
             StationController,
         ],
-        authorizationChecker,
+        authorizationChecker: (action, roles) => checkAuth(action.request.headers, roles),
         defaultErrorHandler: false,
     };
 
@@ -105,15 +106,13 @@ createConnection({
             StationResolver,
         ],
         container: Container,
-        authChecker,
+        authChecker: (data, roles) => checkAuth(data.context.headers, roles),
     });
 
     app.use('/graphql', graphqlHTTP({
         schema,
         graphiql: env.NODE_ENV !== 'production',
     }));
-
-    updatePostmanSchema(printSchema(schema));
 
     // swagger
     const schemas = validationMetadatasToSchemas({
@@ -132,6 +131,11 @@ createConnection({
                 },
             },
         },
+        security: [
+            {
+                apiKey: [],
+            },
+        ],
         info: {
             description: 'Generated with `routing-controllers-openapi`',
             title: 'A sample API',
@@ -147,5 +151,7 @@ createConnection({
 
     app.listen(env.PORT, () => {
         log(`listening on port ${env.PORT}`);
+
+        updatePostman(beautify(JSON.stringify(spec)), printSchema(schema));
     });
 });

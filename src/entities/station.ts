@@ -6,7 +6,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @ObjectType({
     description: 'Station',
 })
-export class Station {
+export default class Station {
     @PrimaryGeneratedColumn()
     @Field({
         description: 'ID',

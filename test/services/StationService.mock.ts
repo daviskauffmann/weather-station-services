@@ -1,4 +1,4 @@
-export class StationServiceMock {
+export default class StationServiceMock {
     findMany() { }
     findOne() { }
     findById() { }

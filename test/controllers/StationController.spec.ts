@@ -1,16 +1,16 @@
 import { NotFoundError } from 'routing-controllers';
 import { Container } from 'typedi';
-import { StationController } from '../../src/controllers/station';
-import { Station } from '../../src/entities/station';
-import { StationService } from '../../src/services/station';
-import { StationServiceMock } from '../mocks/station.service.mock';
+import StationController from '../../src/controllers/StationController';
+import Station from '../../src/entities/Station';
+import StationService from '../../src/services/StationService';
+import StationServiceMock from '../services/StationService.mock';
 
 const station: Station = {
     id: 1234,
     name: 'Test Station',
 }
 
-describe('Station Controller', () => {
+describe('StationController', () => {
     let stationService: StationService;
     let stationController: StationController;
 

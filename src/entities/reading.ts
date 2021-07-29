@@ -6,7 +6,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 @ObjectType({
     description: 'Reading',
 })
-export class Reading {
+export default class Reading {
     @PrimaryColumn({ type: 'timestamp without time zone' })
     @Field({
         description: 'Time',

@@ -2,7 +2,7 @@ import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
 import { ArgsType, Field, Int } from 'type-graphql';
 
 @ArgsType()
-export class ListRequest {
+export default class ListRequest {
     @Field({
         description: 'Return total count',
         nullable: true,

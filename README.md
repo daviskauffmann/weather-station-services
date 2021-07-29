@@ -44,8 +44,16 @@ To run the linter:
 npm run lint
 ```
 
-To run tests
+To run tests:
 
 ```sh
 npm test
+```
+
+### Clean
+
+To clean all build output:
+
+```sh
+npm run clean
 ```

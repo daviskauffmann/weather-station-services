@@ -1,8 +1,8 @@
 import { Container } from 'typedi';
-import { Station } from '../../src/entities/station';
-import { StationResolver } from '../../src/resolvers/station';
-import { StationService } from '../../src/services/station';
-import { StationServiceMock } from '../mocks/station.service.mock';
+import Station from '../../src/entities/station';
+import StationResolver from '../../src/resolvers/StationResolver';
+import StationService from '../../src/services/StationService';
+import StationServiceMock from '../services/StationService.mock';
 
 const station: Station = {
     id: 1234,

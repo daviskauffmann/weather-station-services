@@ -1,12 +1,12 @@
 import { Args, Authorized, Mutation, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import { Reading } from '../entities/reading';
-import { ReadingService } from '../services/reading';
-import { CreateReadingRequest } from '../types/reading';
+import Reading from '../entities/Reading';
+import ReadingService from '../services/ReadingService';
+import { CreateReadingRequest } from '../types/readings';
 
 @Service()
 @Resolver(() => Reading)
-export class ReadingResolver {
+export default class ReadingResolver {
     constructor(
         private readingService: ReadingService,
     ) { }

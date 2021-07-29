@@ -1,12 +1,12 @@
 import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import { Station } from '../entities/station';
-import { StationService } from '../services/station';
-import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/station';
+import Station from '../entities/Station';
+import StationService from '../services/StationService';
+import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
 
 @Service()
 @Resolver(() => Station)
-export class StationResolver {
+export default class StationResolver {
     constructor(
         private stationService: StationService,
     ) { }

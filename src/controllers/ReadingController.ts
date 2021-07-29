@@ -1,13 +1,13 @@
-import { Authorized, BadRequestError, Body, Controller, Delete, Get, OnUndefined, Post } from 'routing-controllers';
+import { Authorized, BadRequestError, Body, Delete, Get, JsonController, OnUndefined, Post } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
-import { ReadingService } from '../services/reading';
-import { StationService } from '../services/station';
-import { CreateReadingRequest } from '../types/reading';
+import ReadingService from '../services/ReadingService';
+import StationService from '../services/StationService';
+import { CreateReadingRequest } from '../types/readings';
 
-@Controller('/api/readings')
+@JsonController('/api/readings')
 @Service()
-export class ReadingController {
+export default class ReadingController {
     constructor(
         private readingService: ReadingService,
         private stationService: StationService,
