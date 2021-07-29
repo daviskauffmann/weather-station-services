@@ -11,7 +11,7 @@ while True:
     response = requests.post(
         'http://localhost:3000/api/readings',
         headers={
-            'x-api-key': '1234',
+            'X-API-Key': '1234',
             'Content-Type': 'application/json',
         },
         json={

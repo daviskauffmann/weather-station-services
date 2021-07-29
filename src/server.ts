@@ -1,8 +1,10 @@
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
+import cors from 'cors';
 import debug from 'debug';
 import express, { NextFunction, Request, Response } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { printSchema } from 'graphql';
+import helmet from 'helmet';
 import logger from 'morgan';
 import { getMetadataArgsStorage, HttpError, RoutingControllersOptions, useContainer as rcUseContainer, useExpressServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
@@ -21,9 +23,13 @@ import { env, pkg } from './environment';
 import { BaseRepository } from './repositories/base-repository';
 import { ReadingRepository } from './repositories/reading';
 import { StationRepository } from './repositories/station';
+import { ReadingResolver } from './resolvers/reading';
 import { StationResolver } from './resolvers/station';
 import updatePostmanSchema from './update-postman-schema';
 
+// TODO: apparently typedi update broke this
+// https://github.com/typestack/class-validator/issues/928
+// cvUseContainer(Container);
 rcUseContainer(Container);
 scUseContainer(Container);
 typeOrmUserCOntainer(Container);
@@ -63,78 +69,83 @@ createConnection({
     // request logging
     app.use(logger(env.LOG_FORMAT));
 
+    // security
+    app.use(helmet());
+
+    // cors
+    app.use(cors());
+
     // body parser
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    if (env.WS) {
-        // websocket server
-        createSocketServer(env.PORT, {
-            controllers: [
-                MessageController,
-            ],
-        });
-    } else {
-        // routing controllers
-        const routingControllersOptions: RoutingControllersOptions = {
-            controllers: [
-                ReadingController,
-                StationController,
-            ],
-            authorizationChecker,
-            defaultErrorHandler: false,
-        };
+    // routing controllers
+    const routingControllersOptions: RoutingControllersOptions = {
+        controllers: [
+            ReadingController,
+            StationController,
+        ],
+        authorizationChecker,
+        defaultErrorHandler: false,
+    };
 
-        useExpressServer(app, routingControllersOptions);
+    useExpressServer(app, routingControllersOptions);
 
-        // graphql
-        const schema = await buildSchema({
-            resolvers: [
-                StationResolver,
-            ],
-            container: Container,
-            authChecker,
-        });
+    // websocket server
+    createSocketServer(env.WS_PORT, {
+        controllers: [
+            MessageController,
+        ],
+    });
 
-        app.use('/graphql', graphqlHTTP({
-            schema,
-            graphiql: env.NODE_ENV !== 'production',
-        }));
+    // graphql
+    const schema = await buildSchema({
+        resolvers: [
+            ReadingResolver,
+            StationResolver,
+        ],
+        container: Container,
+        authChecker,
+    });
 
-        updatePostmanSchema(printSchema(schema));
+    app.use('/graphql', graphqlHTTP({
+        schema,
+        graphiql: env.NODE_ENV !== 'production',
+    }));
 
-        // swagger
-        const schemas = validationMetadatasToSchemas({
-            classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
-            refPointerPrefix: '#/components/schemas/',
-        });
-        const storage = getMetadataArgsStorage()
-        const spec = routingControllersToSpec(storage, routingControllersOptions, {
-            components: {
-                schemas,
-                securitySchemes: {
-                    apiKey: {
-                        type: 'apiKey',
-                        in: 'header',
-                        name: 'x-api-key',
-                    },
+    updatePostmanSchema(printSchema(schema));
+
+    // swagger
+    const schemas = validationMetadatasToSchemas({
+        classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
+        refPointerPrefix: '#/components/schemas/',
+    });
+    const storage = getMetadataArgsStorage()
+    const spec = routingControllersToSpec(storage, routingControllersOptions, {
+        components: {
+            schemas,
+            securitySchemes: {
+                apiKey: {
+                    type: 'apiKey',
+                    in: 'header',
+                    name: 'x-api-key',
                 },
             },
-            info: {
-                description: 'Generated with `routing-controllers-openapi`',
-                title: 'A sample API',
-                version: '1.0.0',
-            },
-        });
+        },
+        info: {
+            description: 'Generated with `routing-controllers-openapi`',
+            title: 'A sample API',
+            version: '1.0.0',
+        },
+    });
 
-        app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
+    app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
 
-        app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-            res.status(err.httpCode || 500).send(err);
-        });
+    app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
+        res.status(err.httpCode || 500).send(err);
+    });
 
-        app.listen(env.PORT, () => {
-            log(`listening on port ${env.PORT}`);
-        });
-    }
+    app.listen(env.PORT, () => {
+        log(`listening on port ${env.PORT}`);
+    });
 });

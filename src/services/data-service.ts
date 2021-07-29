@@ -51,18 +51,18 @@ export abstract class DataService<T extends ObjectLiteral> {
     }
 
     async create(entity: QueryDeepPartialEntity<T>) {
-        await this.defaultRepository.insert(entity);
+        return this.defaultRepository.insert(entity);
     }
 
     async updateById(id: number, update: QueryDeepPartialEntity<T>) {
-        await this.defaultRepository.update({ id }, update);
+        return this.defaultRepository.update({ id }, update);
     }
 
     async deleteMany(findConditions: FindConditions<T>) {
-        await this.defaultRepository.delete(findConditions);
+        return this.defaultRepository.delete(findConditions);
     }
 
     async deleteById(id: number) {
-        await this.defaultRepository.delete({ id });
+        return this.defaultRepository.delete({ id });
     }
 }

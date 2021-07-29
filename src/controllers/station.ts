@@ -1,4 +1,4 @@
-import { Authorized, Body, Controller, Delete, Get, HttpCode, NotFoundError, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Controller, Delete, Get, HttpCode, NotFoundError, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import { Station } from '../entities/station';
@@ -32,7 +32,7 @@ export class StationController {
 
     @Authorized()
     @Post()
-    @HttpCode(201)
+    @OnUndefined(201)
     @OpenAPI({
         summary: 'Create',
         description: 'Create station',
@@ -50,6 +50,7 @@ export class StationController {
 
     @Authorized()
     @Get('/:id')
+    @OnUndefined(404)
     @OpenAPI({
         summary: 'Get',
         description: 'Get station',
@@ -73,15 +74,12 @@ export class StationController {
     async get(
         @Param('id') id: number,
     ) {
-        const station = await this.stationService.findById(id);
-        if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
-        }
-        return station;
+        return this.stationService.findById(id);
     }
 
     @Authorized()
     @Put('/:id')
+    @OnUndefined(200)
     @OpenAPI({
         summary: 'Update',
         description: 'Update station',
@@ -107,6 +105,7 @@ export class StationController {
 
     @Authorized()
     @Delete('/:id')
+    @OnUndefined(200)
     @OpenAPI({
         summary: 'Delete',
         description: 'Delete station',
