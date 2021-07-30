@@ -21,13 +21,4 @@ export default class ReadingResolver {
         await this.readingService.create(reading);
         return true;
     }
-
-    @Authorized()
-    @Mutation(() => Boolean, {
-        description: 'Delete all readings',
-    })
-    async deleteReading() {
-        await this.readingService.deleteMany({});
-        return true;
-    }
 }

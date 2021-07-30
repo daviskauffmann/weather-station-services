@@ -146,7 +146,12 @@ createConnection({
     app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
 
     app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-        res.status(err.httpCode || 500).send(err);
+        res.status(err.httpCode || 500).send({
+            name: err.name,
+            message: err.message,
+            stack: err.stack,
+            errors: (err as any).errors,
+        });
     });
 
     app.listen(env.PORT, () => {

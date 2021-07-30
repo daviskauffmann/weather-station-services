@@ -1,8 +1,9 @@
-import { Authorized, Body, ContentType, Delete, Get, HttpCode, JsonController, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Delete, Get, HttpCode, JsonController, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
 import StationService from '../services/StationService';
+import ApiError from '../types/ApiError';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
 
 @JsonController('/api/stations')
@@ -14,14 +15,16 @@ export default class StationController {
 
     @Authorized()
     @Get()
-    @HttpCode(200)
-    @ContentType('application/json')
     @OpenAPI({
         summary: 'List',
         description: 'List stations',
     })
     @ResponseSchema(ListStationsResponse, {
         description: 'Stations',
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Bad request',
+        statusCode: 400,
     })
     async list(
         @QueryParams() query: ListStationsRequest,
@@ -33,20 +36,23 @@ export default class StationController {
 
     @Authorized()
     @Post()
-    @OnUndefined(201)
+    @HttpCode(201)
     @OpenAPI({
         summary: 'Create',
         description: 'Create station',
-        responses: {
-            201: {
-                description: 'Station created',
-            },
-        },
+    })
+    @ResponseSchema(Station, {
+        description: 'Station created',
+        statusCode: 201,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Bad request',
+        statusCode: 400,
     })
     async create(
-        @Body() body: CreateStationRequest,
+        @Body({ required: true }) body: CreateStationRequest,
     ) {
-        await this.stationService.create(body);
+        return this.stationService.create(body);
     }
 
     @Authorized()
@@ -80,7 +86,7 @@ export default class StationController {
 
     @Authorized()
     @Put('/:id')
-    @OnUndefined(200)
+    @OnUndefined(404)
     @OpenAPI({
         summary: 'Update',
         description: 'Update station',
@@ -92,21 +98,29 @@ export default class StationController {
             },
         ],
         responses: {
-            200: {
-                description: 'Station updated',
+            404: {
+                description: 'Station not found',
             },
         },
     })
+    @ResponseSchema(Station, {
+        description: 'Station updated',
+        statusCode: 200,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Bad request',
+        statusCode: 400,
+    })
     async update(
         @Param('id') id: number,
-        @Body() body: UpdateStationRequest,
+        @Body({ required: true }) body: UpdateStationRequest,
     ) {
-        await this.stationService.updateById(id, body);
+        return this.stationService.updateById(id, body);
     }
 
     @Authorized()
     @Delete('/:id')
-    @OnUndefined(200)
+    @OnUndefined(404)
     @OpenAPI({
         summary: 'Delete',
         description: 'Delete station',
@@ -118,14 +132,18 @@ export default class StationController {
             },
         ],
         responses: {
-            200: {
-                description: 'Station deleted',
+            404: {
+                description: 'Station not found',
             },
         },
+    })
+    @ResponseSchema(Station, {
+        description: 'Station deleted',
+        statusCode: 200,
     })
     async delete(
         @Param('id') id: number,
     ) {
-        await this.stationService.deleteById(id);
+        return this.stationService.deleteById(id);
     }
 }

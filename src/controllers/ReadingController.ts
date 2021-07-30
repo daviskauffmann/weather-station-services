@@ -1,9 +1,11 @@
-import { Authorized, BadRequestError, Body, Delete, Get, JsonController, OnUndefined, Post } from 'routing-controllers';
-import { OpenAPI } from 'routing-controllers-openapi';
+import { Authorized, BadRequestError, Body, Get, HttpCode, JsonController, Post } from 'routing-controllers';
+import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
+import Reading from '../entities/Reading';
 import ReadingService from '../services/ReadingService';
 import StationService from '../services/StationService';
-import { CreateReadingRequest } from '../types/readings';
+import ApiError from '../types/ApiError';
+import { CreateReadingRequest, SearchReadingsResponse } from '../types/readings';
 
 @JsonController('/api/readings')
 @Service()
@@ -15,21 +17,21 @@ export default class ReadingController {
 
     @Authorized()
     @Post()
-    @OnUndefined(201)
+    @HttpCode(201)
     @OpenAPI({
         summary: 'Create',
         description: 'Create reading',
-        responses: {
-            201: {
-                description: 'Reading created',
-            },
-            400: {
-                description: 'Station not found',
-            },
-        },
+    })
+    @ResponseSchema(Reading, {
+        description: 'Reading created',
+        statusCode: 201,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Bad request',
+        statusCode: 400,
     })
     async create(
-        @Body() body: CreateReadingRequest,
+        @Body({ required: true }) body: CreateReadingRequest,
     ) {
         const station = await this.stationService.findById(body.stationId);
         if (!station) {
@@ -40,34 +42,20 @@ export default class ReadingController {
     }
 
     @Authorized()
-    @Delete()
-    @OnUndefined(200)
-    @OpenAPI({
-        summary: 'Delete',
-        description: 'Delete all readings',
-        responses: {
-            200: {
-                description: 'Readings deleted',
-            },
-        },
-        deprecated: true,
-    })
-    async delete() {
-        await this.readingService.deleteMany({});
-    }
-
-    @Authorized()
     @Get('/search')
     @OpenAPI({
         summary: 'Search',
         description: 'Search readings',
-        responses: {
-            200: {
-                description: 'Reading search results',
-            },
-        },
     })
-    async list() {
+    @ResponseSchema(SearchReadingsResponse, {
+        description: 'Search results',
+        statusCode: 200,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Bad request',
+        statusCode: 400,
+    })
+    async search() {
         return this.readingService.search();
     }
 }

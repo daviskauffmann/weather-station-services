@@ -1,6 +1,6 @@
-import { Transform } from 'class-transformer';
-import { IsDate, IsNumber } from 'class-validator';
-import { ArgsType, Field } from 'type-graphql';
+import { Transform, Type } from 'class-transformer';
+import { IsDate, IsNumber, ValidateNested } from 'class-validator';
+import { ArgsType, Field, ObjectType } from 'type-graphql';
 
 @ArgsType()
 export class CreateReadingRequest {
@@ -30,4 +30,16 @@ export class CreateReadingRequest {
     })
     @IsNumber()
     rain1h!: number;
+}
+
+@ObjectType({
+    description: 'Search readings response',
+})
+export class SearchReadingsResponse {
+    @Field(() => [String], {
+        description: 'Items',
+    })
+    @ValidateNested({ each: true })
+    @Type(() => String)
+    items!: string[];
 }
