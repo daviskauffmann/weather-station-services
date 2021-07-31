@@ -7,8 +7,8 @@ export default abstract class DataService<T extends ObjectLiteral> {
         protected defaultRepository: Repository<T>
     ) { }
 
-    async findMany(findConditions: FindConditions<T>, total?: boolean, pageSize?: number, pageNumber?: number): Promise<FindManyResult<T>> {
-        const where = findConditions;
+    async findMany(conditions: FindConditions<T>, total?: boolean, pageSize?: number, pageNumber?: number): Promise<FindManyResult<T>> {
+        const where = conditions;
         const take = pageSize;
         const skip = (pageSize || 0) * (pageNumber || 0);
 
@@ -36,8 +36,8 @@ export default abstract class DataService<T extends ObjectLiteral> {
         };
     }
 
-    async findOne(findConditions: FindConditions<T>) {
-        return this.defaultRepository.findOne(findConditions);
+    async findOne(conditions: FindConditions<T>) {
+        return this.defaultRepository.findOne(conditions);
     }
 
     async findById(id: number) {
@@ -45,18 +45,22 @@ export default abstract class DataService<T extends ObjectLiteral> {
     }
 
     async create(entity: QueryDeepPartialEntity<T>) {
+        // TODO: return created entity
         return this.defaultRepository.insert(entity);
     }
 
     async updateById(id: number, update: QueryDeepPartialEntity<T>) {
+        // TODO: return updated entity
         return this.defaultRepository.update({ id }, update);
     }
 
-    async deleteMany(findConditions: FindConditions<T>) {
-        return this.defaultRepository.delete(findConditions);
+    async deleteMany(conditions: FindConditions<T>) {
+        // TODO: maybe return all deleted entities?
+        return this.defaultRepository.delete(conditions);
     }
 
     async deleteById(id: number) {
+        // TODO: return deleted entity
         return this.defaultRepository.delete({ id });
     }
 }

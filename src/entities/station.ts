@@ -2,7 +2,7 @@ import { IsNumber, IsString } from 'class-validator';
 import { Field, ObjectType } from 'type-graphql';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'stations' })
+@Entity({ name: 'station' })
 @ObjectType({
     description: 'Station',
 })

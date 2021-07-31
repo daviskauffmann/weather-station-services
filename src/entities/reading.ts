@@ -2,7 +2,7 @@ import { IsDate, IsNumber } from 'class-validator';
 import { Field, ObjectType } from 'type-graphql';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: 'readings' })
+@Entity({ name: 'reading' })
 @ObjectType({
     description: 'Reading',
 })

@@ -28,16 +28,16 @@ describe('Station Service', () => {
 
     test('should find stations', async () => {
         const stations = [station];
-        const findConditions = {};
+        const conditions = {};
 
         jest
             .spyOn(stationRepository, 'find')
             .mockImplementation(() => stations as any);
 
-        const result = await stationService.findMany(findConditions);
+        const result = await stationService.findMany(conditions);
 
         expect(stationRepository.find).toHaveBeenCalledWith({
-            where: findConditions,
+            where: conditions,
             take: undefined,
             skip: 0,
         });
@@ -48,16 +48,16 @@ describe('Station Service', () => {
 
     test('should find stations and return total', async () => {
         const stations = [station];
-        const findConditions = {};
+        const conditions = {};
 
         jest
             .spyOn(stationRepository, 'findAndCount')
             .mockImplementation(() => [stations, stations.length] as any);
 
-        const result = await stationService.findMany(findConditions, true);
+        const result = await stationService.findMany(conditions, true);
 
         expect(stationRepository.findAndCount).toHaveBeenCalledWith({
-            where: findConditions,
+            where: conditions,
             take: undefined,
             skip: 0,
         });
