@@ -1,4 +1,4 @@
-import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
@@ -54,7 +54,7 @@ export default class StationController {
     async create(
         @Body({ required: true }) body: CreateStationRequest,
     ) {
-        return this.stationService.create(body);
+        return this.stationService.insert(body);
     }
 
     @Authorized()
@@ -81,12 +81,7 @@ export default class StationController {
     async get(
         @Param('id') id: number,
     ) {
-        const station = await this.stationService.findById(id);
-        if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
-        }
-
-        return station;
+        return this.stationService.findById(id);
     }
 
     @Authorized(['admin'])
@@ -118,12 +113,7 @@ export default class StationController {
         @Param('id') id: number,
         @Body({ required: true }) body: UpdateStationRequest,
     ) {
-        const station = await this.stationService.findById(id);
-        if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
-        }
-
-        return this.stationService.update(station, body);
+        return this.stationService.updateById(id, body);
     }
 
     @Authorized(['admin'])
@@ -150,12 +140,7 @@ export default class StationController {
     async delete(
         @Param('id') id: number,
     ) {
-        const station = await this.stationService.findById(id);
-        if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
-        }
-
-        return this.stationService.remove(station);
+        return this.stationService.deleteById(id);
     }
 
     @Authorized(['admin'])
@@ -184,7 +169,7 @@ export default class StationController {
     ) {
         const station = await this.stationService.findById(id);
         if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
+            throw new NotFoundError();
         }
 
         return generateStationToken(station);

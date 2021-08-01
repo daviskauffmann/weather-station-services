@@ -5,4 +5,8 @@ import BaseRepository from './BaseRepository';
 
 @Service()
 @EntityRepository(User)
-export default class UserRepository extends BaseRepository<User> { }
+export default class UserRepository extends BaseRepository<User> {
+    constructor() {
+        super('user');
+    }
+}

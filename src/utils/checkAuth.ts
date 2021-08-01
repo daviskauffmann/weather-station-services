@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from './environment';
 
 export default function (request: Request, roles: string[]) {
     const authorization = request.headers['authorization'];
@@ -8,7 +9,7 @@ export default function (request: Request, roles: string[]) {
     }
 
     const accessToken = authorization.replace('Bearer ', '');
-    const decoded = jwt.verify(accessToken, '1234') as jwt.JwtPayload;
+    const decoded = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET) as jwt.JwtPayload;
 
     for (const role of roles) {
         if (!(decoded.roles as string[]).includes(role)) {

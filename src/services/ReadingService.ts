@@ -18,10 +18,8 @@ export default class ReadingService extends DataService<Reading> {
     }
 
     async search() {
-        const items = await this.readingRepository.averageTemperatureInterval();
-
         return {
-            items,
+            items: await this.readingRepository.averageTemperatureInterval(),
         };
     }
 }

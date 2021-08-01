@@ -2,10 +2,6 @@ import { getManager, ObjectLiteral } from 'typeorm';
 import BaseRepository from './BaseRepository';
 
 export default abstract class TimescaleRepository<T extends ObjectLiteral> extends BaseRepository<T> {
-    constructor(public tableName: string) {
-        super();
-    }
-
     async init() {
         await super.init();
 

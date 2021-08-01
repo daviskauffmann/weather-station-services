@@ -92,45 +92,46 @@ describe('Station Service', () => {
 
     test('should create a station', async () => {
         jest
-            .spyOn(stationRepository, 'save')
+            .spyOn(stationRepository, 'insertAndReturn')
             .mockImplementation(() => station as any);
 
         const entity = {
             name: station.name,
         };
 
-        const result = await stationService.create(entity);
+        const result = await stationService.insert(entity);
 
-        expect(stationRepository.save).toHaveBeenCalledWith(entity);
+        expect(stationRepository.insertAndReturn).toHaveBeenCalledWith(entity);
         expect(result).toEqual(station);
     });
 
     test('should update a station', async () => {
         jest
-            .spyOn(stationRepository, 'save')
+            .spyOn(stationRepository, 'updateAndReturn')
             .mockImplementation(() => station as any);
 
         const update = {
             name: station.name,
         };
 
-        const result = await stationService.update(station, update);
+        const result = await stationService.updateById(station.id, update);
 
-        expect(stationRepository.save).toHaveBeenCalledWith({
-            ...station,
-            ...update,
-        });
+        expect(stationRepository.updateAndReturn).toHaveBeenCalledWith({
+            id: station.id,
+        }, update);
         expect(result).toEqual(station);
     });
 
     test('should delete a station', async () => {
         jest
-            .spyOn(stationRepository, 'remove')
+            .spyOn(stationRepository, 'deleteAndReturn')
             .mockImplementation(() => station as any);
 
-        const result = await stationService.remove(station);
+        const result = await stationService.deleteById(station.id);
 
-        expect(stationRepository.remove).toHaveBeenCalledWith(station);
+        expect(stationRepository.deleteAndReturn).toHaveBeenCalledWith({
+            id: station.id,
+        });
         expect(result).toEqual(station);
     });
 });

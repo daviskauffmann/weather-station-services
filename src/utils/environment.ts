@@ -34,6 +34,12 @@ export const env = envsafe({
     POSTGRES_PASSWORD: str({
         devDefault: 'postgres',
     }),
+    ACCESS_TOKEN_SECRET: str({
+        devDefault: 'access-token-secret',
+    }),
+    REFRESH_TOKEN_SECRET: str({
+        devDefault: 'refresh-token-secret',
+    }),
     POSTMAN_API_KEY: str({
         default: '',
         allowEmpty: true,

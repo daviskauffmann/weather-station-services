@@ -1,9 +1,10 @@
-import { DeepPartial, FindConditions, ObjectLiteral, Repository } from 'typeorm';
+import { DeepPartial, FindConditions, ObjectLiteral } from 'typeorm';
+import BaseRepository from '../repositories/BaseRepository';
 import FindManyResult from '../types/FindManyResult';
 
 export default abstract class DataService<T extends ObjectLiteral> {
     constructor(
-        protected defaultRepository: Repository<T>
+        protected defaultRepository: BaseRepository<T>,
     ) { }
 
     async findMany(conditions: FindConditions<T>, total?: boolean, pageSize?: number, pageNumber?: number): Promise<FindManyResult<T>> {
@@ -43,18 +44,15 @@ export default abstract class DataService<T extends ObjectLiteral> {
         return this.defaultRepository.findOne({ id });
     }
 
-    async create(entity: DeepPartial<T>) {
-        return this.defaultRepository.save(entity);
+    async insert(entity: DeepPartial<T>) {
+        return this.defaultRepository.insertAndReturn(entity);
     }
 
-    async update(entity: T, update: DeepPartial<T>) {
-        return this.defaultRepository.save({
-            ...entity,
-            ...update,
-        });
+    async updateById(id: number, update: DeepPartial<T>) {
+        return this.defaultRepository.updateAndReturn({ id }, update);
     }
 
-    async remove(entity: T) {
-        return this.defaultRepository.remove(entity);
+    async deleteById(id: number) {
+        return this.defaultRepository.deleteAndReturn({ id });
     }
 }

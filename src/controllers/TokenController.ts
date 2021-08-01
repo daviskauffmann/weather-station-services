@@ -5,6 +5,7 @@ import { Service } from 'typedi';
 import UserService from '../services/UserService';
 import ApiError from '../types/ApiError';
 import { AccessAndRefreshTokenResponse, RefreshTokenRequest } from '../types/tokens';
+import { env } from '../utils/environment';
 import { generateUserTokens } from '../utils/tokens';
 
 @JsonController('/api/tokens')
@@ -30,7 +31,7 @@ export default class TokenController {
     async refreshToken(
         @Body() body: RefreshTokenRequest,
     ) {
-        const decoded = jwt.verify(body.refreshToken, '4321') as jwt.JwtPayload;
+        const decoded = jwt.verify(body.refreshToken, env.REFRESH_TOKEN_SECRET) as jwt.JwtPayload;
         const userId = Number(decoded.sub);
         if (!userId) {
             throw new UnauthorizedError();

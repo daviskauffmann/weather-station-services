@@ -60,7 +60,7 @@ describe('Station Resolver', () => {
 
     test('should create a station', async () => {
         jest
-            .spyOn(stationService, 'create')
+            .spyOn(stationService, 'insert')
             .mockImplementation(() => station as any);
 
         const entity = {
@@ -69,7 +69,7 @@ describe('Station Resolver', () => {
 
         const result = await stationResolver.createStation(entity);
 
-        expect(stationService.create).toHaveBeenCalledWith(entity);
+        expect(stationService.insert).toHaveBeenCalledWith(entity);
         expect(result).toEqual(station);
     });
 
@@ -82,12 +82,12 @@ describe('Station Resolver', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => station as any);
         jest
-            .spyOn(stationService, 'update')
+            .spyOn(stationService, 'updateById')
             .mockImplementation(() => station as any);
 
         const result = await stationResolver.updateStation(station.id, update);
 
-        expect(stationService.update).toHaveBeenCalledWith(station, update);
+        expect(stationService.updateById).toHaveBeenCalledWith(station.id, update);
         expect(result).toEqual(station);
     });
 
@@ -96,12 +96,12 @@ describe('Station Resolver', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => station as any);
         jest
-            .spyOn(stationService, 'remove')
+            .spyOn(stationService, 'deleteById')
             .mockImplementation(() => station as any);
 
         const result = await stationResolver.deleteStation(station.id);
 
-        expect(stationService.remove).toHaveBeenCalledWith(station);
+        expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
         expect(result).toEqual(station);
     });
 });

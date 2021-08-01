@@ -39,10 +39,10 @@ export default class ReadingController {
 
         const station = await this.stationService.findById(stationId);
         if (!station) {
-            throw new BadRequestError(`Station "${stationId}" not found`);
+            throw new BadRequestError(`Invalid station ID "${stationId}"`);
         }
 
-        return this.readingService.create({
+        return this.readingService.insert({
             ...body,
             stationId,
         });

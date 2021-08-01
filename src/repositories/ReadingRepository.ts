@@ -11,39 +11,42 @@ export default class ReadingRepository extends TimescaleRepository<Reading> {
     }
 
     async averageTemperatureTotal() {
-        return getManager().query(`
-            SELECT
-                station_id AS "stationId",
-                avg(temperature) AS "avg"
-            FROM reading
-            WHERE time > now() - INTERVAL '2 years'
-            GROUP BY "stationId"
-        `);
+        return this.createQueryBuilder()
+            .select(`
+                ${this.tableName}.station_id AS "stationId",
+                avg(${this.tableName}.temperature) AS "averageTemperature"
+            `)
+            .from(this.tableName, this.tableName)
+            .where(`${this.tableName}.time > now() - INTERVAL '2 years'`)
+            .groupBy(`"stationId"`)
+            .execute();
     }
 
     async averageTemperatureInterval() {
-        return getManager().query(`
-            SELECT 
-                time_bucket('15 days', time) AS "bucket",
-                station_id AS "stationId",
-                avg(temperature) AS "averageTemperature"
-            FROM reading
-            WHERE time > now() - INTERVAL '6 months'
-            GROUP BY "bucket", "stationId"
-            ORDER BY "bucket"
-        `);
+        return this.createQueryBuilder()
+            .select(`
+                time_bucket('15 days', ${this.tableName}.time) AS "bucket",
+                ${this.tableName}.station_id AS "stationId",
+                avg(${this.tableName}.temperature) AS "averageTemperature"
+            `)
+            .from(this.tableName, this.tableName)
+            .where(`${this.tableName}.time > now() - INTERVAL '6 months'`)
+            .groupBy(`"bucket", "stationId"`)
+            .orderBy(`"bucket", "stationId"`)
+            .execute();
     }
 
     async sumRainInterval() {
-        return getManager().query(`
-            SELECT
-                time_bucket_gapfill('30 days', time) as "bucket",
-                station_id AS "stationId",
-                sum(rain_1h) AS "sumRain1h"
-            FROM reading
-            WHERE time > now() - INTERVAL '1 year' AND time < now()
-            GROUP BY "bucket", "stationId"
-            ORDER BY "bucket"
-        `);
+        return this.createQueryBuilder()
+            .select(`
+                time_bucket_gapfill('30 days', ${this.tableName}.time) as "bucket",
+                ${this.tableName}.station_id AS "stationId",
+                sum(${this.tableName}.rain_1h) AS "sumRain1h"
+            `)
+            .from(this.tableName, this.tableName)
+            .where(`${this.tableName}.time > now() - INTERVAL '1 year' AND ${this.tableName}.time < now()`)
+            .groupBy(`"bucket", "stationId"`)
+            .orderBy(`"bucket", "stationId"`)
+            .execute();
     }
 }

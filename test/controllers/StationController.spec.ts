@@ -38,8 +38,8 @@ describe('StationController', () => {
 
     test('should create a station', async () => {
         jest
-            .spyOn(stationService, 'create')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationService, 'insert')
+            .mockImplementation(() => station as any);
 
         const body = {
             name: station.name,
@@ -47,8 +47,8 @@ describe('StationController', () => {
 
         const result = await stationController.create(body);
 
-        expect(stationService.create).toHaveBeenCalledWith(body);
-        expect(result).toEqual(undefined);
+        expect(stationService.insert).toHaveBeenCalledWith(body);
+        expect(result).toEqual(station);
     });
 
     test('should get a station by id', async () => {
@@ -88,12 +88,12 @@ describe('StationController', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => station as any);
         jest
-            .spyOn(stationService, 'update')
+            .spyOn(stationService, 'updateById')
             .mockImplementation(() => station as any);
 
         const result = await stationController.update(station.id, body);
 
-        expect(stationService.update).toHaveBeenCalledWith(station, body);
+        expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
         expect(result).toEqual(station);
     });
 
@@ -102,12 +102,12 @@ describe('StationController', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => station as any);
         jest
-            .spyOn(stationService, 'remove')
+            .spyOn(stationService, 'deleteById')
             .mockImplementation(() => station as any);
 
         const result = await stationController.delete(station.id);
 
-        expect(stationService.remove).toHaveBeenCalledWith(station);
+        expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
         expect(result).toEqual(station);
     });
 });

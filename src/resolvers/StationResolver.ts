@@ -43,7 +43,7 @@ export default class StationResolver {
     async createStation(
         @Args() station: CreateStationRequest,
     ) {
-        return this.stationService.create(station);
+        return this.stationService.insert(station);
     }
 
     @Authorized()
@@ -57,12 +57,7 @@ export default class StationResolver {
         }) id: number,
         @Args() update: UpdateStationRequest,
     ) {
-        const station = await this.stationService.findById(id);
-        if (!station) {
-            return undefined;
-        }
-
-        return this.stationService.update(station, update);
+        return this.stationService.updateById(id, update);
     }
 
     @Authorized()
@@ -75,11 +70,6 @@ export default class StationResolver {
             description: 'Station ID',
         }) id: number,
     ) {
-        const station = await this.stationService.findById(id);
-        if (!station) {
-            return undefined;
-        }
-
-        return this.stationService.remove(station);
+        return this.stationService.deleteById(id);
     }
 }

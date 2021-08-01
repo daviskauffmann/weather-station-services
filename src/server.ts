@@ -126,6 +126,7 @@ createConnection({
     useExpressServer(app, routingControllersOptions);
 
     // websocket server
+    // TODO: doesn't work
     createSocketServer(env.WS_PORT, {
         controllers: [
             MessageController,
@@ -177,6 +178,7 @@ createConnection({
 
     app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(spec));
 
+    // error handler
     app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
         res.status(err.httpCode || 500).send({
             name: err.name,
@@ -186,6 +188,7 @@ createConnection({
         });
     });
 
+    // start server
     app.listen(env.PORT, () => {
         log(`listening on port ${env.PORT}`);
 

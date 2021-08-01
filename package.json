@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "debug": "nodemon -r dotenv/config -r source-map-support/register dist",
+    "debug": "nodemon --delay 1 -r dotenv/config -r source-map-support/register dist",
     "lint": "eslint src/**/*.ts",
     "start": "node -r dotenv/config -r source-map-support/register dist",
     "test": "jest --watchAll --coverage",

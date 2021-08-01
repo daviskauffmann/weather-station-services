@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt';
-import { Body, HttpCode, InternalServerError, JsonController, Post, UnauthorizedError } from 'routing-controllers';
+import { Request } from 'express';
+import { Authorized, Body, Get, HttpCode, JsonController, Post, Req, UnauthorizedError } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
+import User from '../entities/User';
 import UserService from '../services/UserService';
 import ApiError from '../types/ApiError';
 import { AccessAndRefreshTokenResponse } from '../types/tokens';
@@ -38,17 +40,12 @@ export default class UserController {
     async register(
         @Body() body: UserRegisterRequest,
     ) {
-        await this.userService.create({
+        const user = await this.userService.insert({
             username: body.username,
             password: await bcrypt.hash(body.password, 10),
             email: body.email,
             roles: ['user'],
         });
-
-        const user = await this.userService.findByUsername(body.username);
-        if (!user) {
-            throw new InternalServerError('Failed to create user');
-        }
 
         return generateUserTokens(user);
     }
@@ -80,5 +77,28 @@ export default class UserController {
         }
 
         return generateUserTokens(user);
+    }
+
+    @Authorized()
+    @Get('/me')
+    @OpenAPI({
+        summary: 'Me',
+        description: 'Get user info',
+    })
+    @ResponseSchema(User, {
+        description: 'User',
+        statusCode: 200,
+    })
+    async get(
+        @Req() req: Request,
+    ) {
+        const id = (req as any).jwt.sub as number;
+
+        const user = await this.userService.findById(id);
+
+        return {
+            ...user,
+            password: undefined,
+        };
     }
 }

@@ -18,6 +18,6 @@ export default class ReadingResolver {
     async createReading(
         @Args() reading: CreateReadingRequest,
     ) {
-        return this.readingService.create(reading);
+        return this.readingService.insert(reading);
     }
 }
