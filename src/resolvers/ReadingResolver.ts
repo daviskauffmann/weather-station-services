@@ -12,13 +12,12 @@ export default class ReadingResolver {
     ) { }
 
     @Authorized()
-    @Mutation(() => Boolean, {
+    @Mutation(() => Reading, {
         description: 'Create reading',
     })
     async createReading(
         @Args() reading: CreateReadingRequest,
     ) {
-        await this.readingService.create(reading);
-        return true;
+        return this.readingService.create(reading);
     }
 }

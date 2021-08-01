@@ -1,4 +1,3 @@
-import { NotFoundError } from 'routing-controllers';
 import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
@@ -50,6 +49,7 @@ export default class StationResolver {
     @Authorized()
     @Mutation(() => Station, {
         description: 'Update station',
+        nullable: true,
     })
     async updateStation(
         @Arg('id', {
@@ -59,7 +59,7 @@ export default class StationResolver {
     ) {
         const station = await this.stationService.findById(id);
         if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
+            return undefined;
         }
 
         return this.stationService.update(station, update);
@@ -68,6 +68,7 @@ export default class StationResolver {
     @Authorized()
     @Mutation(() => Station, {
         description: 'Delete station',
+        nullable: true,
     })
     async deleteStation(
         @Arg('id', {
@@ -76,7 +77,7 @@ export default class StationResolver {
     ) {
         const station = await this.stationService.findById(id);
         if (!station) {
-            throw new NotFoundError(`Station "${id}" not found`);
+            return undefined;
         }
 
         return this.stationService.remove(station);
