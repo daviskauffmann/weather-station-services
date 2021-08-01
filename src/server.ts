@@ -17,16 +17,21 @@ import { createConnection, getManager, ObjectLiteral, useContainer as typeOrmUse
 import MessageController from './controllers/MessageController';
 import ReadingController from './controllers/ReadingController';
 import StationController from './controllers/StationController';
+import TokenController from './controllers/TokenController';
+import UserController from './controllers/UserController';
 import Reading from './entities/Reading';
 import Station from './entities/Station';
+import User from './entities/User';
 import BaseRepository from './repositories/BaseRepository';
 import ReadingRepository from './repositories/ReadingRepository';
 import StationRepository from './repositories/StationRepository';
+import UserRepository from './repositories/UserRepository';
 import ReadingResolver from './resolvers/ReadingResolver';
 import StationResolver from './resolvers/StationResolver';
 import checkAuth from './utils/checkAuth';
 import { env, pkg } from './utils/environment';
 import updatePostman from './utils/updatePostman';
+import bcrypt from 'bcrypt';
 
 // TODO: apparently typedi update broke this
 // https://github.com/typestack/class-validator/issues/928
@@ -50,6 +55,7 @@ createConnection({
     entities: [
         Reading,
         Station,
+        User,
     ],
     synchronize: true,
 }).then(async () => {
@@ -60,7 +66,24 @@ createConnection({
     await Promise.all(([
         ReadingRepository,
         StationRepository,
+        UserRepository,
     ] as Token<BaseRepository<ObjectLiteral>>[]).map(Repository => Container.get(Repository).init()));
+
+    // TODO: insert admin user if not exists
+    await getManager().query(`
+        INSERT INTO "user" ("id", "username", "password", "email", "roles")
+        SELECT
+            1 AS "id",
+            'admin' AS "username",
+            '${await bcrypt.hash('admin', 10)}' AS "password",
+            'admin@admin.com' AS "email",
+            ARRAY['admin'] AS "roles"
+        WHERE NOT EXISTS (
+            SELECT "id"
+            FROM "user"
+            WHERE "id" = 1
+        )
+    `)
 
     log(`connected to ${connectionType} database "${env.POSTGRES_DATABASE}" at ${env.POSTGRES_HOST}:${env.POSTGRES_PORT}`);
 
@@ -71,7 +94,15 @@ createConnection({
     app.use(logger(env.LOG_FORMAT));
 
     // security
-    app.use(helmet());
+    app.use(helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: [`'self'`, `'unsafe-inline'`],
+                imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+                scriptSrc: [`'self'`, `'unsafe-inline'`, `'unsafe-eval'`],
+            },
+        },
+    }));
 
     // cors
     app.use(cors());
@@ -85,8 +116,10 @@ createConnection({
         controllers: [
             ReadingController,
             StationController,
+            TokenController,
+            UserController,
         ],
-        authorizationChecker: (action, roles) => checkAuth(action.request.headers, roles),
+        authorizationChecker: (action, roles) => checkAuth(action.request, roles),
         defaultErrorHandler: false,
     };
 
@@ -106,7 +139,7 @@ createConnection({
             StationResolver,
         ],
         container: Container,
-        authChecker: (data, roles) => checkAuth(data.context.headers, roles),
+        authChecker: (data, roles) => checkAuth(data.context, roles),
     });
 
     app.use('/graphql', graphqlHTTP({
@@ -124,16 +157,15 @@ createConnection({
         components: {
             schemas,
             securitySchemes: {
-                apiKey: {
-                    type: 'apiKey',
-                    in: 'header',
-                    name: 'x-api-key',
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
                 },
             },
         },
         security: [
             {
-                apiKey: [],
+                BearerAuth: [],
             },
         ],
         info: {

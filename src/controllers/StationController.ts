@@ -1,10 +1,12 @@
-import { Authorized, Body, Delete, Get, HttpCode, JsonController, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
 import StationService from '../services/StationService';
 import ApiError from '../types/ApiError';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
+import { AccessTokenResponse } from '../types/tokens';
+import { generateStationToken } from '../utils/tokens';
 
 @JsonController('/api/stations')
 @Service()
@@ -23,7 +25,7 @@ export default class StationController {
         description: 'Stations',
     })
     @ResponseSchema(ApiError, {
-        description: 'Bad request',
+        description: 'Invalid body',
         statusCode: 400,
     })
     async list(
@@ -34,7 +36,7 @@ export default class StationController {
         }, query.total, query.pageSize, query.pageNumber);
     }
 
-    @Authorized()
+    @Authorized(['admin'])
     @Post()
     @HttpCode(201)
     @OpenAPI({
@@ -46,18 +48,18 @@ export default class StationController {
         statusCode: 201,
     })
     @ResponseSchema(ApiError, {
-        description: 'Bad request',
+        description: 'Invalid body',
         statusCode: 400,
     })
     async create(
         @Body({ required: true }) body: CreateStationRequest,
     ) {
-        return this.stationService.create(body);
+        const result = await this.stationService.create(body);
+        return this.stationService.findById(result.identifiers[0].id);
     }
 
     @Authorized()
     @Get('/:id')
-    @OnUndefined(404)
     @OpenAPI({
         summary: 'Get',
         description: 'Get station',
@@ -68,25 +70,28 @@ export default class StationController {
                 description: 'Station ID',
             },
         ],
-        responses: {
-            404: {
-                description: 'Station not found',
-            },
-        },
     })
     @ResponseSchema(Station, {
         description: 'Station',
         statusCode: 200,
     })
+    @ResponseSchema(ApiError, {
+        description: 'Station not found',
+        statusCode: 404,
+    })
     async get(
         @Param('id') id: number,
     ) {
-        return this.stationService.findById(id);
+        const station = await this.stationService.findById(id);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+
+        return station;
     }
 
-    @Authorized()
+    @Authorized(['admin'])
     @Put('/:id')
-    @OnUndefined(404)
     @OpenAPI({
         summary: 'Update',
         description: 'Update station',
@@ -97,28 +102,33 @@ export default class StationController {
                 description: 'Station ID',
             },
         ],
-        responses: {
-            404: {
-                description: 'Station not found',
-            },
-        },
     })
     @ResponseSchema(Station, {
         description: 'Station updated',
         statusCode: 200,
     })
     @ResponseSchema(ApiError, {
-        description: 'Bad request',
+        description: 'Invalid body',
         statusCode: 400,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Station not found',
+        statusCode: 404,
     })
     async update(
         @Param('id') id: number,
         @Body({ required: true }) body: UpdateStationRequest,
     ) {
-        return this.stationService.updateById(id, body);
+        const station = await this.stationService.findById(id);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+
+        await this.stationService.updateById(id, body);
+        return this.stationService.findById(id);
     }
 
-    @Authorized()
+    @Authorized(['admin'])
     @Delete('/:id')
     @OnUndefined(404)
     @OpenAPI({
@@ -131,19 +141,57 @@ export default class StationController {
                 description: 'Station ID',
             },
         ],
-        responses: {
-            404: {
-                description: 'Station not found',
-            },
-        },
     })
     @ResponseSchema(Station, {
         description: 'Station deleted',
         statusCode: 200,
     })
+    @ResponseSchema(ApiError, {
+        description: 'Station not found',
+        statusCode: 404,
+    })
     async delete(
         @Param('id') id: number,
     ) {
-        return this.stationService.deleteById(id);
+        const station = await this.stationService.findById(id);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+
+        await this.stationService.deleteById(id);
+        return station;
+    }
+
+    @Authorized(['admin'])
+    @Post('/:id/generate-token')
+    @OnUndefined(404)
+    @OpenAPI({
+        summary: 'Generate token',
+        description: 'Generate fixed station token',
+        parameters: [
+            {
+                name: 'id',
+                in: 'path',
+                description: 'Station ID',
+            },
+        ],
+    })
+    @ResponseSchema(AccessTokenResponse, {
+        description: 'Access token generated',
+        statusCode: 200,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Station not found',
+        statusCode: 404,
+    })
+    async generateToken(
+        @Param('id') id: number,
+    ) {
+        const station = await this.stationService.findById(id);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+
+        return generateStationToken(station);
     }
 }

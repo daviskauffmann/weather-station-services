@@ -12,14 +12,6 @@ export class CreateReadingRequest {
     time!: Date;
 
     @Field({
-        description: 'Set station ID',
-    })
-    // TODO: once class-transformer supports promises, transform stationId into an actual station from the db
-    // https://github.com/typestack/class-transformer/issues/549
-    @IsNumber()
-    stationId!: number;
-
-    @Field({
         description: 'Set temperature',
     })
     @IsNumber()

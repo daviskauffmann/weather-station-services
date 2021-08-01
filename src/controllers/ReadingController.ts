@@ -1,4 +1,5 @@
-import { Authorized, BadRequestError, Body, Get, HttpCode, JsonController, Post } from 'routing-controllers';
+import { Request } from 'express';
+import { Authorized, BadRequestError, Body, Get, HttpCode, JsonController, Post, Req } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Reading from '../entities/Reading';
@@ -15,7 +16,7 @@ export default class ReadingController {
         private stationService: StationService,
     ) { }
 
-    @Authorized()
+    @Authorized(['station'])
     @Post()
     @HttpCode(201)
     @OpenAPI({
@@ -27,18 +28,25 @@ export default class ReadingController {
         statusCode: 201,
     })
     @ResponseSchema(ApiError, {
-        description: 'Bad request',
+        description: 'Invalid body',
         statusCode: 400,
     })
     async create(
         @Body({ required: true }) body: CreateReadingRequest,
+        @Req() req: Request,
     ) {
-        const station = await this.stationService.findById(body.stationId);
+        const stationId = (req as any).jwt.sub as number;
+
+        const station = await this.stationService.findById(stationId);
         if (!station) {
-            throw new BadRequestError(`Station "${body.stationId}" not found`);
+            throw new BadRequestError(`Station "${stationId}" not found`);
         }
 
-        await this.readingService.create(body);
+        const result = await this.readingService.create({
+            ...body,
+            stationId,
+        });
+        return this.readingService.findByTime(result.identifiers[0].time);
     }
 
     @Authorized()
@@ -52,7 +60,7 @@ export default class ReadingController {
         statusCode: 200,
     })
     @ResponseSchema(ApiError, {
-        description: 'Bad request',
+        description: 'Invalid body',
         statusCode: 400,
     })
     async search() {

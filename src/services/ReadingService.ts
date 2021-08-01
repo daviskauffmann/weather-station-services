@@ -12,6 +12,15 @@ export default class ReadingService extends DataService<Reading> {
         super(readingRepository);
     }
 
+    async findById(id: number) {
+        throw new Error(`"findById" unavailable. Did you mean "findByTime"?`);
+        return undefined;
+    }
+
+    async findByTime(time: Date) {
+        return this.readingRepository.findOne({ time });
+    }
+
     async search() {
         const items = await this.readingRepository.averageTemperatureInterval();
 

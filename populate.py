@@ -11,12 +11,11 @@ while True:
     response = requests.post(
         'http://localhost:3000/api/readings',
         headers={
-            'X-API-Key': '1234',
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGVzIjpbInN0YXRpb24iXSwiaWF0IjoxNjI3NzcxODkzfQ.20r6RNcC-5zWVwqaIoTKigRDtvn30bID8pPNBQnuODs',
             'Content-Type': 'application/json',
         },
         json={
             'time': time,
-            'stationId': 1,
             'temperature': random.randrange(0, 100),
             'rain1h': random.randrange(0, 10),
         })
