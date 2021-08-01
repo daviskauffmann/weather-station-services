@@ -1,14 +1,9 @@
 import { NotFoundError } from 'routing-controllers';
 import { Container } from 'typedi';
 import StationController from '../../src/controllers/StationController';
-import Station from '../../src/entities/Station';
 import StationService from '../../src/services/StationService';
+import station from '../entities/station.mock';
 import StationServiceMock from '../services/StationService.mock';
-
-const station: Station = {
-    id: 1234,
-    name: 'Test Station',
-}
 
 describe('StationController', () => {
     let stationService: StationService;
@@ -90,23 +85,29 @@ describe('StationController', () => {
         };
 
         jest
-            .spyOn(stationService, 'updateById')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationService, 'findById')
+            .mockImplementation(() => station as any);
+        jest
+            .spyOn(stationService, 'update')
+            .mockImplementation(() => station as any);
 
         const result = await stationController.update(station.id, body);
 
-        expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
-        expect(result).toEqual(undefined);
+        expect(stationService.update).toHaveBeenCalledWith(station, body);
+        expect(result).toEqual(station);
     });
 
     test('should delete a station', async () => {
         jest
-            .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationService, 'findById')
+            .mockImplementation(() => station as any);
+        jest
+            .spyOn(stationService, 'remove')
+            .mockImplementation(() => station as any);
 
         const result = await stationController.delete(station.id);
 
-        expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
-        expect(result).toEqual(undefined);
+        expect(stationService.remove).toHaveBeenCalledWith(station);
+        expect(result).toEqual(station);
     });
 });

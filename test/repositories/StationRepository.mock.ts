@@ -1,8 +1,3 @@
-export default class StationRepositoryMock {
-    find() { }
-    findAndCount() { }
-    findOne() { }
-    insert() { }
-    update() { }
-    delete() { }
-}
+import BaseRepositoryMock from './BaseRepository.mock';
+
+export default class StationRepositoryMock extends BaseRepositoryMock { }

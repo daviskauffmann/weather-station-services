@@ -42,11 +42,10 @@ export default class ReadingController {
             throw new BadRequestError(`Station "${stationId}" not found`);
         }
 
-        const result = await this.readingService.create({
+        return this.readingService.create({
             ...body,
             stationId,
         });
-        return this.readingService.findByTime(result.identifiers[0].time);
     }
 
     @Authorized()

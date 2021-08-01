@@ -13,12 +13,8 @@ export default class ReadingService extends DataService<Reading> {
     }
 
     async findById(id: number) {
-        throw new Error(`"findById" unavailable. Did you mean "findByTime"?`);
+        throw new Error(`"findById" unavailable`);
         return undefined;
-    }
-
-    async findByTime(time: Date) {
-        return this.readingRepository.findOne({ time });
     }
 
     async search() {

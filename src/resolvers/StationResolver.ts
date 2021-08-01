@@ -1,3 +1,4 @@
+import { NotFoundError } from 'routing-controllers';
 import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
@@ -37,18 +38,17 @@ export default class StationResolver {
     }
 
     @Authorized()
-    @Mutation(() => Boolean, {
+    @Mutation(() => Station, {
         description: 'Create station',
     })
     async createStation(
         @Args() station: CreateStationRequest,
     ) {
-        await this.stationService.create(station);
-        return true;
+        return this.stationService.create(station);
     }
 
     @Authorized()
-    @Mutation(() => Boolean, {
+    @Mutation(() => Station, {
         description: 'Update station',
     })
     async updateStation(
@@ -57,12 +57,16 @@ export default class StationResolver {
         }) id: number,
         @Args() update: UpdateStationRequest,
     ) {
-        await this.stationService.updateById(id, update);
-        return true;
+        const station = await this.stationService.findById(id);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+
+        return this.stationService.update(station, update);
     }
 
     @Authorized()
-    @Mutation(() => Boolean, {
+    @Mutation(() => Station, {
         description: 'Delete station',
     })
     async deleteStation(
@@ -70,7 +74,11 @@ export default class StationResolver {
             description: 'Station ID',
         }) id: number,
     ) {
-        await this.stationService.deleteById(id);
-        return true;
+        const station = await this.stationService.findById(id);
+        if (!station) {
+            throw new NotFoundError(`Station "${id}" not found`);
+        }
+
+        return this.stationService.remove(station);
     }
 }

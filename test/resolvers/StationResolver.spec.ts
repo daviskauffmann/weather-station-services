@@ -1,13 +1,8 @@
 import { Container } from 'typedi';
-import Station from '../../src/entities/station';
 import StationResolver from '../../src/resolvers/StationResolver';
 import StationService from '../../src/services/StationService';
+import station from '../entities/station.mock';
 import StationServiceMock from '../services/StationService.mock';
-
-const station: Station = {
-    id: 1234,
-    name: 'Test Station',
-}
 
 describe('Station Resolver', () => {
     let stationService: StationService;
@@ -75,7 +70,7 @@ describe('Station Resolver', () => {
         const result = await stationResolver.createStation(entity);
 
         expect(stationService.create).toHaveBeenCalledWith(entity);
-        expect(result).toEqual(true);
+        expect(result).toEqual(station);
     });
 
     test('should update a station', async () => {
@@ -84,23 +79,29 @@ describe('Station Resolver', () => {
         };
 
         jest
-            .spyOn(stationService, 'updateById')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationService, 'findById')
+            .mockImplementation(() => station as any);
+        jest
+            .spyOn(stationService, 'update')
+            .mockImplementation(() => station as any);
 
         const result = await stationResolver.updateStation(station.id, update);
 
-        expect(stationService.updateById).toHaveBeenCalledWith(station.id, update);
-        expect(result).toEqual(true);
+        expect(stationService.update).toHaveBeenCalledWith(station, update);
+        expect(result).toEqual(station);
     });
 
     test('should delete a station', async () => {
         jest
-            .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationService, 'findById')
+            .mockImplementation(() => station as any);
+        jest
+            .spyOn(stationService, 'remove')
+            .mockImplementation(() => station as any);
 
         const result = await stationResolver.deleteStation(station.id);
 
-        expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
-        expect(result).toEqual(true);
+        expect(stationService.remove).toHaveBeenCalledWith(station);
+        expect(result).toEqual(station);
     });
 });

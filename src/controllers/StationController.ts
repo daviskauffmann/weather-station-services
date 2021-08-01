@@ -1,4 +1,4 @@
-import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
@@ -32,7 +32,7 @@ export default class StationController {
         @QueryParams() query: ListStationsRequest,
     ) {
         return this.stationService.findMany({
-            name: query.name,
+            ...query.name && { name: query.name },
         }, query.total, query.pageSize, query.pageNumber);
     }
 
@@ -54,8 +54,7 @@ export default class StationController {
     async create(
         @Body({ required: true }) body: CreateStationRequest,
     ) {
-        const result = await this.stationService.create(body);
-        return this.stationService.findById(result.identifiers[0].id);
+        return this.stationService.create(body);
     }
 
     @Authorized()
@@ -124,13 +123,11 @@ export default class StationController {
             throw new NotFoundError(`Station "${id}" not found`);
         }
 
-        await this.stationService.updateById(id, body);
-        return this.stationService.findById(id);
+        return this.stationService.update(station, body);
     }
 
     @Authorized(['admin'])
     @Delete('/:id')
-    @OnUndefined(404)
     @OpenAPI({
         summary: 'Delete',
         description: 'Delete station',
@@ -158,13 +155,11 @@ export default class StationController {
             throw new NotFoundError(`Station "${id}" not found`);
         }
 
-        await this.stationService.deleteById(id);
-        return station;
+        return this.stationService.remove(station);
     }
 
     @Authorized(['admin'])
     @Post('/:id/generate-token')
-    @OnUndefined(404)
     @OpenAPI({
         summary: 'Generate token',
         description: 'Generate fixed station token',

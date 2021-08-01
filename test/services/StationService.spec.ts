@@ -1,13 +1,8 @@
 import { Container } from 'typedi';
-import Station from '../../src/entities/station';
 import StationRepository from '../../src/repositories/StationRepository';
 import StationService from '../../src/services/StationService';
+import station from '../entities/station.mock';
 import StationRepositoryMock from '../repositories/StationRepository.mock';
-
-const station: Station = {
-    id: 1234,
-    name: 'Test Station',
-};
 
 jest.mock('typeorm-typedi-extensions', () => ({
     InjectRepository: () => () => { },
@@ -97,8 +92,8 @@ describe('Station Service', () => {
 
     test('should create a station', async () => {
         jest
-            .spyOn(stationRepository, 'insert')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationRepository, 'save')
+            .mockImplementation(() => station as any);
 
         const entity = {
             name: station.name,
@@ -106,37 +101,36 @@ describe('Station Service', () => {
 
         const result = await stationService.create(entity);
 
-        expect(stationRepository.insert).toHaveBeenCalledWith(entity);
-        expect(result).toEqual(undefined);
+        expect(stationRepository.save).toHaveBeenCalledWith(entity);
+        expect(result).toEqual(station);
     });
 
     test('should update a station', async () => {
         jest
-            .spyOn(stationRepository, 'update')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationRepository, 'save')
+            .mockImplementation(() => station as any);
 
         const update = {
             name: station.name,
         };
 
-        const result = await stationService.updateById(station.id, update);
+        const result = await stationService.update(station, update);
 
-        expect(stationRepository.update).toHaveBeenCalledWith({
-            id: station.id,
-        }, update);
-        expect(result).toEqual(undefined);
+        expect(stationRepository.save).toHaveBeenCalledWith({
+            ...station,
+            ...update,
+        });
+        expect(result).toEqual(station);
     });
 
     test('should delete a station', async () => {
         jest
-            .spyOn(stationRepository, 'delete')
-            .mockImplementation(() => undefined as any);
+            .spyOn(stationRepository, 'remove')
+            .mockImplementation(() => station as any);
 
-        const result = await stationService.deleteById(station.id);
+        const result = await stationService.remove(station);
 
-        expect(stationRepository.delete).toHaveBeenCalledWith({
-            id: station.id,
-        });
-        expect(result).toEqual(undefined);
+        expect(stationRepository.remove).toHaveBeenCalledWith(station);
+        expect(result).toEqual(station);
     });
 });

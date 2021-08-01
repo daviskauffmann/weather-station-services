@@ -1,8 +1,3 @@
-export default class StationServiceMock {
-    findMany() { }
-    findOne() { }
-    findById() { }
-    create() { }
-    updateById() { }
-    deleteById() { }
-}
+import DataServiceMock from './DataService.mock';
+
+export default class StationServiceMock extends DataServiceMock { }

@@ -1,5 +1,4 @@
-import { FindConditions, ObjectLiteral, Repository } from 'typeorm';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { DeepPartial, FindConditions, ObjectLiteral, Repository } from 'typeorm';
 import FindManyResult from '../types/FindManyResult';
 
 export default abstract class DataService<T extends ObjectLiteral> {
@@ -44,23 +43,18 @@ export default abstract class DataService<T extends ObjectLiteral> {
         return this.defaultRepository.findOne({ id });
     }
 
-    async create(entity: QueryDeepPartialEntity<T>) {
-        // TODO: return created entity
-        return this.defaultRepository.insert(entity);
+    async create(entity: DeepPartial<T>) {
+        return this.defaultRepository.save(entity);
     }
 
-    async updateById(id: number, update: QueryDeepPartialEntity<T>) {
-        // TODO: return updated entity
-        return this.defaultRepository.update({ id }, update);
+    async update(entity: T, update: DeepPartial<T>) {
+        return this.defaultRepository.save({
+            ...entity,
+            ...update,
+        });
     }
 
-    async deleteMany(conditions: FindConditions<T>) {
-        // TODO: maybe return all deleted entities?
-        return this.defaultRepository.delete(conditions);
-    }
-
-    async deleteById(id: number) {
-        // TODO: return deleted entity
-        return this.defaultRepository.delete({ id });
+    async remove(entity: T) {
+        return this.defaultRepository.remove(entity);
     }
 }
