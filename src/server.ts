@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt';
+import { defaultMetadataStorage } from 'class-transformer/storage';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import cors from 'cors';
 import debug from 'debug';
@@ -31,7 +33,6 @@ import StationResolver from './resolvers/StationResolver';
 import checkAuth from './utils/checkAuth';
 import { env, pkg } from './utils/environment';
 import updatePostman from './utils/updatePostman';
-import bcrypt from 'bcrypt';
 
 // TODO: apparently typedi update broke this
 // https://github.com/typestack/class-validator/issues/928
@@ -150,7 +151,7 @@ createConnection({
 
     // swagger
     const schemas = validationMetadatasToSchemas({
-        classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
+        classTransformerMetadataStorage: defaultMetadataStorage,
         refPointerPrefix: '#/components/schemas/',
     });
     const storage = getMetadataArgsStorage()
