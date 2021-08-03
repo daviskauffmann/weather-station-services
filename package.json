@@ -13,8 +13,20 @@
     "test": "jest --coverage",
     "test:watch": "jest --watchAll --coverage"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daviskauffmann/weather-station-services.git"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Davis Kauffmann",
+    "email": "daviskauffmann@gmail.com"
+  },
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daviskauffmann/weather-station-services/issues"
+  },
+  "homepage": "https://github.com/daviskauffmann/weather-station-services#readme",
   "dependencies": {
     "bcrypt": "^5.0.1",
     "class-transformer": "0.2.3 - 0.3.1",
