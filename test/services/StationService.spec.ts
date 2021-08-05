@@ -73,6 +73,9 @@ describe('Station Service', () => {
 
         expect(stationRepository.findOne).toHaveBeenCalledWith({
             name: station.name,
+        }, {
+            select: undefined,
+            relations: undefined,
         });
         expect(result).toEqual(station);
     });
@@ -86,6 +89,9 @@ describe('Station Service', () => {
 
         expect(stationRepository.findOne).toHaveBeenCalledWith({
             id: station.id,
+        }, {
+            select: undefined,
+            relations: undefined,
         });
         expect(result).toEqual(station);
     });
@@ -107,8 +113,8 @@ describe('Station Service', () => {
 
     test('should update a station', async () => {
         jest
-            .spyOn(stationRepository, 'updateAndReturn')
-            .mockImplementation(() => station as any);
+            .spyOn(stationRepository, 'update')
+            .mockImplementation(() => ({ affected: 1 }) as any);
 
         const update = {
             name: station.name,
@@ -116,22 +122,22 @@ describe('Station Service', () => {
 
         const result = await stationService.updateById(station.id, update);
 
-        expect(stationRepository.updateAndReturn).toHaveBeenCalledWith({
+        expect(stationRepository.update).toHaveBeenCalledWith({
             id: station.id,
         }, update);
-        expect(result).toEqual(station);
+        expect(result).toEqual({ updated: 1 });
     });
 
     test('should delete a station', async () => {
         jest
-            .spyOn(stationRepository, 'deleteAndReturn')
-            .mockImplementation(() => station as any);
+            .spyOn(stationRepository, 'delete')
+            .mockImplementation(() => ({ affected: 1 }) as any);
 
         const result = await stationService.deleteById(station.id);
 
-        expect(stationRepository.deleteAndReturn).toHaveBeenCalledWith({
+        expect(stationRepository.delete).toHaveBeenCalledWith({
             id: station.id,
         });
-        expect(result).toEqual(station);
+        expect(result).toEqual({ deleted: 1 });
     });
 });

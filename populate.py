@@ -11,7 +11,7 @@ while True:
     response = requests.post(
         'http://localhost:3000/api/readings',
         headers={
-            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGVzIjpbInN0YXRpb24iXSwiaWF0IjoxNjI3NzcxODkzfQ.20r6RNcC-5zWVwqaIoTKigRDtvn30bID8pPNBQnuODs',
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGVzIjpbInN0YXRpb24iXSwiaWF0IjoxNjI4MDU2NjE2fQ.3hIlQ7HPQP6Th8SP-SYkqmOHQkInMm2BUSwLLzCpUUc',
             'Content-Type': 'application/json',
         },
         json={

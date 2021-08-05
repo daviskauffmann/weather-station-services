@@ -1,11 +1,14 @@
-import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, OnUndefined, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, Param, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
 import StationService from '../services/StationService';
 import ApiError from '../types/ApiError';
+import DeleteResult from '../types/DeleteResult';
+import GetRequest from '../types/GetRequest';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
 import { AccessTokenResponse } from '../types/tokens';
+import UpdateResult from '../types/UpdateResult';
 import { generateStationToken } from '../utils/tokens';
 
 @JsonController('/api/stations')
@@ -33,7 +36,7 @@ export default class StationController {
     ) {
         return this.stationService.findMany({
             ...query.name && { name: query.name },
-        }, query.total, query.pageSize, query.pageNumber);
+        }, query.total, query.pageSize, query.pageNumber, query.select?.split(','), query.relations?.split(','));
     }
 
     @Authorized(['admin'])
@@ -80,8 +83,9 @@ export default class StationController {
     })
     async get(
         @Param('id') id: number,
+        @QueryParams() query: GetRequest,
     ) {
-        return this.stationService.findById(id);
+        return this.stationService.findById(id, query.select?.split(','), query.relations?.split(','));
     }
 
     @Authorized(['admin'])
@@ -97,7 +101,7 @@ export default class StationController {
             },
         ],
     })
-    @ResponseSchema(Station, {
+    @ResponseSchema(UpdateResult, {
         description: 'Station updated',
         statusCode: 200,
     })
@@ -129,7 +133,7 @@ export default class StationController {
             },
         ],
     })
-    @ResponseSchema(Station, {
+    @ResponseSchema(DeleteResult, {
         description: 'Station deleted',
         statusCode: 200,
     })

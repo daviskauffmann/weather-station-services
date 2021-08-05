@@ -3,6 +3,6 @@ export default abstract class BaseRepositoryMock {
     findAndCount() { }
     findOne() { }
     insertAndReturn() { }
-    updateAndReturn() { }
-    deleteAndReturn() { }
+    update() { }
+    delete() { }
 }

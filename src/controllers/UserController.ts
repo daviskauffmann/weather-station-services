@@ -1,11 +1,12 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
-import { Authorized, Body, Get, HttpCode, JsonController, Post, Req, UnauthorizedError } from 'routing-controllers';
+import { Authorized, Body, Get, HttpCode, JsonController, Post, QueryParams, Req, UnauthorizedError } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import User from '../entities/User';
 import UserService from '../services/UserService';
 import ApiError from '../types/ApiError';
+import GetRequest from '../types/GetRequest';
 import { AccessAndRefreshTokenResponse } from '../types/tokens';
 import { UserLoginRequest, UserRegisterRequest } from '../types/users';
 import { generateUserTokens } from '../utils/tokens';
@@ -90,11 +91,12 @@ export default class UserController {
         statusCode: 200,
     })
     async get(
+        @QueryParams() query: GetRequest,
         @Req() req: Request,
     ) {
         const id = (req as any).jwt.sub as number;
 
-        const user = await this.userService.findById(id);
+        const user = await this.userService.findById(id, query.select?.split(','), query.relations?.split(','));
 
         return {
             ...user,

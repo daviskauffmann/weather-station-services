@@ -79,29 +79,23 @@ describe('Station Resolver', () => {
         };
 
         jest
-            .spyOn(stationService, 'findById')
-            .mockImplementation(() => station as any);
-        jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => station as any);
+            .mockImplementation(() => ({ updated: 1 }) as any);
 
         const result = await stationResolver.updateStation(station.id, update);
 
         expect(stationService.updateById).toHaveBeenCalledWith(station.id, update);
-        expect(result).toEqual(station);
+        expect(result).toEqual({ updated: 1 });
     });
 
     test('should delete a station', async () => {
         jest
-            .spyOn(stationService, 'findById')
-            .mockImplementation(() => station as any);
-        jest
             .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => station as any);
+            .mockImplementation(() => ({ deleted: 1 }) as any);
 
         const result = await stationResolver.deleteStation(station.id);
 
         expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
-        expect(result).toEqual(station);
+        expect(result).toEqual({ deleted: 1 });
     });
 });

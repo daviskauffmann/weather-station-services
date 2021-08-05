@@ -2,7 +2,9 @@ import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
 import Station from '../entities/Station';
 import StationService from '../services/StationService';
+import DeleteResult from '../types/DeleteResult';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
+import UpdateResult from '../types/UpdateResult';
 
 @Service()
 @Resolver(() => Station)
@@ -47,7 +49,7 @@ export default class StationResolver {
     }
 
     @Authorized()
-    @Mutation(() => Station, {
+    @Mutation(() => UpdateResult, {
         description: 'Update station',
         nullable: true,
     })
@@ -61,7 +63,7 @@ export default class StationResolver {
     }
 
     @Authorized()
-    @Mutation(() => Station, {
+    @Mutation(() => DeleteResult, {
         description: 'Delete station',
         nullable: true,
     })

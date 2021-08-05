@@ -1,8 +1,9 @@
 import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
 import { ArgsType, Field, Int } from 'type-graphql';
+import GetRequest from './GetRequest';
 
 @ArgsType()
-export default class ListRequest {
+export default class ListRequest extends GetRequest {
     @Field({
         description: 'Return total count',
         nullable: true,

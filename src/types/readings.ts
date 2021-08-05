@@ -7,7 +7,7 @@ export class CreateReadingRequest {
     @Field({
         description: 'Set time',
     })
-    @Transform(({ value }) => new Date(value))
+    @Transform((value: string) => new Date(value))
     @IsDate()
     time!: Date;
 
