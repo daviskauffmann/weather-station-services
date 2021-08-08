@@ -1,11 +1,14 @@
 import debug from 'debug';
+import { GraphQLSchema, printSchema } from 'graphql';
 import https from 'https';
+import { js as beautify } from 'js-beautify';
+import { OpenAPIObject } from 'openapi3-ts';
 import { env, pkg } from './environment';
 
 const log = debug(`${pkg.name}`);
 const error = debug(`${pkg.name}:error`);
 
-export default async function (openapiSchema: string, graphqlSchema: string) {
+export default async function (spec: OpenAPIObject, schema: GraphQLSchema) {
     if (env.POSTMAN_API_KEY) {
         if (env.POSTMAN_REST_API_ID && env.POSTMAN_REST_VERSION_ID && env.POSTMAN_REST_SCHEMA_ID) {
             const request = https.request({
@@ -40,7 +43,7 @@ export default async function (openapiSchema: string, graphqlSchema: string) {
                 schema: {
                     type: 'openapi3',
                     language: 'json',
-                    schema: openapiSchema,
+                    schema: beautify(JSON.stringify(spec)),
                 },
             }));
 
@@ -80,7 +83,7 @@ export default async function (openapiSchema: string, graphqlSchema: string) {
                 schema: {
                     type: 'graphql',
                     language: 'graphql',
-                    schema: graphqlSchema,
+                    schema: printSchema(schema),
                 },
             }));
 

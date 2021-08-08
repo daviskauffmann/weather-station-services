@@ -16,9 +16,6 @@ export const env = envsafe({
     WS_PORT: port({
         default: 3001,
     }),
-    LOG_FORMAT: str({
-        default: 'dev',
-    }),
     POSTGRES_HOST: str({
         devDefault: 'localhost',
     }),

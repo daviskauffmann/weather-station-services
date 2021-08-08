@@ -1,8 +1,8 @@
-import { Request } from 'express';
 import jwt from 'jsonwebtoken';
+import Koa from 'koa';
 import { env } from './environment';
 
-export default function (request: Request, roles: string[]) {
+export default function (request: Koa.Context, roles: string[]) {
     const authorization = request.headers['authorization'];
     if (!authorization) {
         return false;
@@ -17,7 +17,10 @@ export default function (request: Request, roles: string[]) {
         }
     }
 
-    (request as any).jwt = decoded;
+    request.state.user = {
+        id: decoded.sub,
+        roles: decoded.roles,
+    };
 
     return true;
 }

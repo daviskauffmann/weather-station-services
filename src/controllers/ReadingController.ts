@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { Authorized, BadRequestError, Body, Get, HttpCode, JsonController, Post, Req } from 'routing-controllers';
+import Koa from 'koa';
+import { Authorized, BadRequestError, Body, Ctx, Get, HttpCode, JsonController, Post } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import Reading from '../entities/Reading';
@@ -33,9 +33,9 @@ export default class ReadingController {
     })
     async create(
         @Body({ required: true }) body: CreateReadingRequest,
-        @Req() req: Request,
+        @Ctx() ctx: Koa.Context,
     ) {
-        const stationId = (req as any).jwt.sub as number;
+        const stationId = ctx.state.user.id;
 
         const station = await this.stationService.findById(stationId);
         if (!station) {

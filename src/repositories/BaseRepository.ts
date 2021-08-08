@@ -1,4 +1,4 @@
-import { DeepPartial, FindConditions, ObjectLiteral, Repository } from 'typeorm';
+import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
 
 export default abstract class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
     constructor(public tableName: string) {

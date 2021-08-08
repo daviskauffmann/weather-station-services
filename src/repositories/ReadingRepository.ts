@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { EntityRepository, getManager } from 'typeorm';
+import { EntityRepository } from 'typeorm';
 import Reading from '../entities/Reading';
 import TimescaleRepository from './TimescaleRepository';
 

@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
-import { Request } from 'express';
-import { Authorized, Body, Get, HttpCode, JsonController, Post, QueryParams, Req, UnauthorizedError } from 'routing-controllers';
+import Koa from 'koa';
+import { Authorized, Body, Ctx, Get, HttpCode, JsonController, Post, QueryParams, UnauthorizedError } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import User from '../entities/User';
@@ -92,9 +92,9 @@ export default class UserController {
     })
     async get(
         @QueryParams() query: GetRequest,
-        @Req() req: Request,
+        @Ctx() ctx: Koa.Context,
     ) {
-        const id = (req as any).jwt.sub as number;
+        const id = ctx.state.user.id;
 
         const user = await this.userService.findById(id, query.select?.split(','), query.relations?.split(','));
 
