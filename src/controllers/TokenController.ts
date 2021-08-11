@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import { Body, JsonController, Post, UnauthorizedError } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
+import ApiError from '../dtos/ApiError';
+import { AccessAndRefreshTokenResponse, RefreshTokenRequest } from '../dtos/tokens';
 import UserService from '../services/UserService';
-import ApiError from '../types/ApiError';
-import { AccessAndRefreshTokenResponse, RefreshTokenRequest } from '../types/tokens';
 import { env } from '../utils/environment';
 import { generateUserTokens } from '../utils/tokens';
 
@@ -30,7 +30,7 @@ export default class TokenController {
     })
     async refreshToken(
         @Body() body: RefreshTokenRequest,
-    ) {
+    ): Promise<AccessAndRefreshTokenResponse> {
         const decoded = jwt.verify(body.refreshToken, env.REFRESH_TOKEN_SECRET) as jwt.JwtPayload;
         const userId = Number(decoded.sub);
         if (!userId) {

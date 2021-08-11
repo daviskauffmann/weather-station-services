@@ -1,8 +1,7 @@
 import { Args, Authorized, Mutation, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import Reading from '../entities/Reading';
+import { CreateReadingRequest, Reading } from '../dtos/readings';
 import ReadingService from '../services/ReadingService';
-import { CreateReadingRequest } from '../types/readings';
 
 @Service()
 @Resolver(() => Reading)
@@ -16,8 +15,9 @@ export default class ReadingResolver {
         description: 'Create reading',
     })
     async createReading(
-        @Args() reading: CreateReadingRequest,
-    ) {
-        return this.readingService.insert(reading);
+        @Args() entity: CreateReadingRequest,
+    ): Promise<Reading> {
+        const reading = await this.readingService.insert(entity);
+        return new Reading(reading);
     }
 }

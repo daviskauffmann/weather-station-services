@@ -135,7 +135,6 @@ createConnection({
             UserController,
         ],
         authorizationChecker: ({ context }, roles) => checkAuth(context, roles),
-        defaultErrorHandler: false,
     };
 
     useKoaServer(app, routingControllersOptions);

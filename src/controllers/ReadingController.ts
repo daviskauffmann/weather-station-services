@@ -2,11 +2,10 @@ import Koa from 'koa';
 import { Authorized, BadRequestError, Body, Ctx, Get, HttpCode, JsonController, Post } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
-import Reading from '../entities/Reading';
+import ApiError from '../dtos/ApiError';
+import { CreateReadingRequest, Reading, SearchReadingsResponse } from '../dtos/readings';
 import ReadingService from '../services/ReadingService';
 import StationService from '../services/StationService';
-import ApiError from '../types/ApiError';
-import { CreateReadingRequest, SearchReadingsResponse } from '../types/readings';
 
 @JsonController('/api/readings')
 @Service()
@@ -34,7 +33,7 @@ export default class ReadingController {
     async create(
         @Body({ required: true }) body: CreateReadingRequest,
         @Ctx() ctx: Koa.Context,
-    ) {
+    ): Promise<Reading> {
         const stationId = ctx.state.user.id;
 
         const station = await this.stationService.findById(stationId);
@@ -42,10 +41,11 @@ export default class ReadingController {
             throw new BadRequestError(`Invalid station ID "${stationId}"`);
         }
 
-        return this.readingService.insert({
+        const reading = await this.readingService.insert({
             ...body,
             stationId,
         });
+        return new Reading(reading);
     }
 
     @Authorized()
@@ -62,7 +62,7 @@ export default class ReadingController {
         description: 'Invalid body',
         statusCode: 400,
     })
-    async search() {
+    async search(): Promise<SearchReadingsResponse> {
         return this.readingService.search();
     }
 }

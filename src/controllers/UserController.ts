@@ -3,12 +3,11 @@ import Koa from 'koa';
 import { Authorized, Body, Ctx, Get, HttpCode, JsonController, Post, QueryParams, UnauthorizedError } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
-import User from '../entities/User';
+import ApiError from '../dtos/ApiError';
+import GetRequest from '../dtos/GetRequest';
+import { AccessAndRefreshTokenResponse } from '../dtos/tokens';
+import { User, UserLoginRequest, UserRegisterRequest } from '../dtos/users';
 import UserService from '../services/UserService';
-import ApiError from '../types/ApiError';
-import GetRequest from '../types/GetRequest';
-import { AccessAndRefreshTokenResponse } from '../types/tokens';
-import { UserLoginRequest, UserRegisterRequest } from '../types/users';
 import { generateUserTokens } from '../utils/tokens';
 
 // TODO: admin route to grant user roles
@@ -40,7 +39,7 @@ export default class UserController {
     })
     async register(
         @Body() body: UserRegisterRequest,
-    ) {
+    ): Promise<AccessAndRefreshTokenResponse> {
         const user = await this.userService.insert({
             username: body.username,
             password: await bcrypt.hash(body.password, 10),
@@ -66,7 +65,7 @@ export default class UserController {
     })
     async login(
         @Body() body: UserLoginRequest,
-    ) {
+    ): Promise<AccessAndRefreshTokenResponse> {
         const user = await this.userService.findByUsername(body.username);
         if (!user) {
             throw new UnauthorizedError();
@@ -93,14 +92,13 @@ export default class UserController {
     async get(
         @QueryParams() query: GetRequest,
         @Ctx() ctx: Koa.Context,
-    ) {
+    ): Promise<User> {
         const id = ctx.state.user.id;
 
         const user = await this.userService.findById(id, query.select?.split(','), query.relations?.split(','));
-
-        return {
-            ...user,
-            password: undefined,
-        };
+        if (!user) {
+            throw new UnauthorizedError();
+        }
+        return new User(user);
     }
 }

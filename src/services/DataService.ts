@@ -1,8 +1,10 @@
 import { DeepPartial, FindConditions, FindManyOptions, getConnection, ObjectLiteral } from 'typeorm';
 import BaseRepository from '../repositories/BaseRepository';
-import DeleteResult from '../types/DeleteResult';
-import FindManyResult from '../types/FindManyResult';
-import UpdateResult from '../types/UpdateResult';
+
+export interface FindManyResult<T extends ObjectLiteral> {
+    entities: T[];
+    total?: number;
+}
 
 export default abstract class DataService<T extends ObjectLiteral> {
     constructor(
@@ -18,20 +20,17 @@ export default abstract class DataService<T extends ObjectLiteral> {
             relations: this.validateRelations(relations),
         };
 
-        let items: T[]
-        let count: number | undefined;
         if (total) {
-            [items, count] = await this.defaultRepository.findAndCount(options);
+            const result = await this.defaultRepository.findAndCount(options);
+            return {
+                entities: result[0],
+                total: result[1],
+            }
         } else {
-            items = await this.defaultRepository.find(options);
+            return {
+                entities: await this.defaultRepository.find(options),
+            };
         }
-
-        return {
-            items,
-            total: count,
-            pageSize,
-            pageNumber,
-        };
     }
 
     async findOne(conditions: FindConditions<T>, select?: string[], relations?: string[]) {
@@ -49,24 +48,13 @@ export default abstract class DataService<T extends ObjectLiteral> {
         return this.defaultRepository.insertAndReturn(entity);
     }
 
-    async updateById(id: number, update: DeepPartial<T>): Promise<UpdateResult | undefined> {
-        const result = await this.defaultRepository.update({ id }, update);
-        if (!result.affected) {
-            return undefined;
-        }
-        return {
-            updated: result.affected,
-        };
+    async updateById(id: number, update: DeepPartial<T>) {
+        return this.defaultRepository.update({ id }, update);
+
     }
 
-    async deleteById(id: number): Promise<DeleteResult | undefined> {
-        const result = await this.defaultRepository.delete({ id });
-        if (!result.affected) {
-            return undefined;
-        }
-        return {
-            deleted: result.affected,
-        };
+    async deleteById(id: number) {
+        return this.defaultRepository.delete({ id });
     }
 
     private validateSelect(select?: string[]) {

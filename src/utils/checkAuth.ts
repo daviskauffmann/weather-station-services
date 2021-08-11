@@ -9,7 +9,13 @@ export default function (request: Koa.Context, roles: string[]) {
     }
 
     const accessToken = authorization.replace('Bearer ', '');
-    const decoded = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET) as jwt.JwtPayload;
+    let decoded: jwt.JwtPayload;
+    try {
+        decoded = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET) as jwt.JwtPayload;
+    } catch (err) {
+        err.httpCode = 401;
+        throw err;
+    }
 
     for (const role of roles) {
         if (!(decoded.roles as string[]).includes(role)) {

@@ -14,5 +14,5 @@ export default class ApiError {
 
     @ValidateNested({ each: true })
     @Type(() => String)
-    errors?: string[]
+    errors?: string[];
 }

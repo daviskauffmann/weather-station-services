@@ -1,10 +1,10 @@
 import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import Station from '../entities/Station';
+import DeleteResult from '../dtos/DeleteResult';
+import GetRequest from '../dtos/GetRequest';
+import { CreateStationRequest, ListStationsRequest, ListStationsResponse, Station, UpdateStationRequest } from '../dtos/stations';
+import UpdateResult from '../dtos/UpdateResult';
 import StationService from '../services/StationService';
-import DeleteResult from '../types/DeleteResult';
-import { CreateStationRequest, ListStationsRequest, ListStationsResponse, UpdateStationRequest } from '../types/stations';
-import UpdateResult from '../types/UpdateResult';
 
 @Service()
 @Resolver(() => Station)
@@ -19,10 +19,11 @@ export default class StationResolver {
     })
     async stations(
         @Args() args: ListStationsRequest,
-    ) {
-        return this.stationService.findMany({
+    ): Promise<ListStationsResponse> {
+        const result = await this.stationService.findMany({
             name: args.name,
         }, args.total, args.pageSize, args.pageNumber);
+        return new ListStationsResponse(result, args.pageSize, args.pageNumber);
     }
 
     @Authorized()
@@ -34,8 +35,13 @@ export default class StationResolver {
         @Arg('id', {
             description: 'Station ID',
         }) id: number,
-    ) {
-        return this.stationService.findById(id);
+        @Args() args: GetRequest,
+    ): Promise<Station | undefined> {
+        const station = await this.stationService.findById(id, args.select?.split(','), args.relations?.split(','));
+        if (!station) {
+            return undefined;
+        }
+        return new Station(station);
     }
 
     @Authorized()
@@ -43,9 +49,10 @@ export default class StationResolver {
         description: 'Create station',
     })
     async createStation(
-        @Args() station: CreateStationRequest,
-    ) {
-        return this.stationService.insert(station);
+        @Args() entity: CreateStationRequest,
+    ): Promise<Station> {
+        const station = await this.stationService.insert(entity);
+        return new Station(station);
     }
 
     @Authorized()
@@ -58,8 +65,12 @@ export default class StationResolver {
             description: 'Station ID',
         }) id: number,
         @Args() update: UpdateStationRequest,
-    ) {
-        return this.stationService.updateById(id, update);
+    ): Promise<UpdateResult | undefined> {
+        const result = await this.stationService.updateById(id, update);
+        if (!result.affected) {
+            return undefined;
+        }
+        return new UpdateResult(result);
     }
 
     @Authorized()
@@ -71,7 +82,11 @@ export default class StationResolver {
         @Arg('id', {
             description: 'Station ID',
         }) id: number,
-    ) {
-        return this.stationService.deleteById(id);
+    ): Promise<DeleteResult | undefined> {
+        const result = await this.stationService.deleteById(id);
+        if (!result.affected) {
+            return undefined;
+        }
+        return new DeleteResult(result);
     }
 }
