@@ -1,12 +1,10 @@
-import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, Param, Post, Put, QueryParams } from 'routing-controllers';
+import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, OnUndefined, Param, Patch, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import ApiError from '../dtos/ApiError';
-import DeleteResult from '../dtos/DeleteResult';
 import GetRequest from '../dtos/GetRequest';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, Station, UpdateStationRequest } from '../dtos/stations';
 import { AccessTokenResponse } from '../dtos/tokens';
-import UpdateResult from '../dtos/UpdateResult';
 import StationService from '../services/StationService';
 import { generateStationToken } from '../utils/tokens';
 
@@ -94,7 +92,8 @@ export default class StationController {
     }
 
     @Authorized(['admin'])
-    @Put('/:id')
+    @Patch('/:id')
+    @OnUndefined(204)
     @OpenAPI({
         summary: 'Update',
         description: 'Update station',
@@ -105,10 +104,11 @@ export default class StationController {
                 description: 'Station ID',
             },
         ],
-    })
-    @ResponseSchema(UpdateResult, {
-        description: 'Station updated',
-        statusCode: 200,
+        responses: {
+            204: {
+                description: 'Station updated',
+            },
+        },
     })
     @ResponseSchema(ApiError, {
         description: 'Invalid body',
@@ -121,16 +121,53 @@ export default class StationController {
     async update(
         @Param('id') id: number,
         @Body({ required: true }) body: UpdateStationRequest,
-    ): Promise<UpdateResult | undefined> {
+    ): Promise<void> {
         const result = await this.stationService.updateById(id, body);
         if (!result.affected) {
-            return undefined;
+            throw new NotFoundError();
         }
-        return new UpdateResult(result);
+    }
+
+    @Authorized(['admin'])
+    @Put('/:id')
+    @OnUndefined(204)
+    @OpenAPI({
+        summary: 'Replace',
+        description: 'Replace station',
+        parameters: [
+            {
+                name: 'id',
+                in: 'path',
+                description: 'Station ID',
+            },
+        ],
+        responses: {
+            204: {
+                description: 'Station replaced',
+            },
+        },
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Invalid body',
+        statusCode: 400,
+    })
+    @ResponseSchema(ApiError, {
+        description: 'Station not found',
+        statusCode: 404,
+    })
+    async replace(
+        @Param('id') id: number,
+        @Body({ required: true }) body: CreateStationRequest,
+    ): Promise<void> {
+        const result = await this.stationService.updateById(id, body);
+        if (!result.affected) {
+            throw new NotFoundError();
+        }
     }
 
     @Authorized(['admin'])
     @Delete('/:id')
+    @OnUndefined(204)
     @OpenAPI({
         summary: 'Delete',
         description: 'Delete station',
@@ -141,10 +178,11 @@ export default class StationController {
                 description: 'Station ID',
             },
         ],
-    })
-    @ResponseSchema(DeleteResult, {
-        description: 'Station deleted',
-        statusCode: 200,
+        responses: {
+            204: {
+                description: 'Station deleted',
+            },
+        },
     })
     @ResponseSchema(ApiError, {
         description: 'Station not found',
@@ -152,12 +190,11 @@ export default class StationController {
     })
     async delete(
         @Param('id') id: number,
-    ): Promise<DeleteResult | undefined> {
+    ): Promise<void> {
         const result = await this.stationService.deleteById(id);
         if (!result.affected) {
-            return undefined;
+            throw new NotFoundError();
         }
-        return new DeleteResult(result);
     }
 
     @Authorized(['admin'])

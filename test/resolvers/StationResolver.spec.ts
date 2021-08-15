@@ -1,4 +1,5 @@
 import { Container } from 'typedi';
+import { CreateStationRequest, Station, UpdateStationRequest } from '../../src/dtos/stations';
 import StationResolver from '../../src/resolvers/StationResolver';
 import StationService from '../../src/services/StationService';
 import station from '../entities/station.mock';
@@ -18,20 +19,17 @@ describe('Station Resolver', () => {
     });
 
     test('should list stations', async () => {
-        const stations = [station];
-        const query = {};
-
         jest
             .spyOn(stationService, 'findMany')
-            .mockImplementation(() => ({ items: stations }) as any);
+            .mockImplementation(() => ({ entities: [station] }) as any);
 
-        const result = await stationResolver.stations(query);
+        const result = await stationResolver.stations({});
 
         expect(stationService.findMany).toHaveBeenCalledWith({
             name: undefined,
         }, undefined, undefined, undefined);
         expect(result).toEqual({
-            items: stations,
+            items: [new Station(station)],
         });
     });
 
@@ -40,9 +38,9 @@ describe('Station Resolver', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => station as any);
 
-        const result = await stationResolver.station(station.id);
+        const result = await stationResolver.station(station.id, {});
 
-        expect(stationService.findById).toHaveBeenCalledWith(station.id);
+        expect(stationService.findById).toHaveBeenCalledWith(station.id, undefined, undefined);
         expect(result).toEqual(station);
     });
 
@@ -52,20 +50,19 @@ describe('Station Resolver', () => {
             .spyOn(stationService, 'findById')
             .mockImplementation(() => undefined as any);
 
-        const result = await stationResolver.station(station.id);
+        const result = await stationResolver.station(station.id, {});
 
-        expect(stationService.findById).toHaveBeenCalledWith(station.id);
+        expect(stationService.findById).toHaveBeenCalledWith(station.id, undefined, undefined);
         expect(result).toEqual(undefined);
     });
 
     test('should create a station', async () => {
+        const entity = new CreateStationRequest();
+        entity.name = station.name;
+
         jest
             .spyOn(stationService, 'insert')
             .mockImplementation(() => station as any);
-
-        const entity = {
-            name: station.name,
-        };
 
         const result = await stationResolver.createStation(entity);
 
@@ -74,28 +71,41 @@ describe('Station Resolver', () => {
     });
 
     test('should update a station', async () => {
-        const update = {
-            name: station.name,
-        };
+        const update = new UpdateStationRequest();
+        update.name = station.name;
 
         jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => ({ updated: 1 }) as any);
+            .mockImplementation(() => ({ affected: 1 }) as any);
 
         const result = await stationResolver.updateStation(station.id, update);
 
         expect(stationService.updateById).toHaveBeenCalledWith(station.id, update);
-        expect(result).toEqual({ updated: 1 });
+        expect(result).toEqual(true);
+    });
+
+    test('should replace a station', async () => {
+        const entity = new CreateStationRequest();
+        entity.name = station.name;
+
+        jest
+            .spyOn(stationService, 'updateById')
+            .mockImplementation(() => ({ affected: 1 }) as any);
+
+        const result = await stationResolver.replaceStation(station.id, entity);
+
+        expect(stationService.updateById).toHaveBeenCalledWith(station.id, entity);
+        expect(result).toEqual(true);
     });
 
     test('should delete a station', async () => {
         jest
             .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => ({ deleted: 1 }) as any);
+            .mockImplementation(() => ({ affected: 1 }) as any);
 
         const result = await stationResolver.deleteStation(station.id);
 
         expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
-        expect(result).toEqual({ deleted: 1 });
+        expect(result).toEqual(true);
     });
 });

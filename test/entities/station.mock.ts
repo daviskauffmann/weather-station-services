@@ -1,6 +1,6 @@
-import Station from '../../src/entities/station';
+import StationEntity from '../../src/entities/StationEntity';
 
-const station = Object.freeze<Station>({
+const station = Object.freeze<StationEntity>({
     id: 1234,
     name: 'Test Station',
 });

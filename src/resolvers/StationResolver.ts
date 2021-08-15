@@ -1,9 +1,7 @@
 import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import DeleteResult from '../dtos/DeleteResult';
 import GetRequest from '../dtos/GetRequest';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, Station, UpdateStationRequest } from '../dtos/stations';
-import UpdateResult from '../dtos/UpdateResult';
 import StationService from '../services/StationService';
 
 @Service()
@@ -56,7 +54,7 @@ export default class StationResolver {
     }
 
     @Authorized()
-    @Mutation(() => UpdateResult, {
+    @Mutation(() => Boolean, {
         description: 'Update station',
         nullable: true,
     })
@@ -65,16 +63,34 @@ export default class StationResolver {
             description: 'Station ID',
         }) id: number,
         @Args() update: UpdateStationRequest,
-    ): Promise<UpdateResult | undefined> {
+    ): Promise<true> {
         const result = await this.stationService.updateById(id, update);
         if (!result.affected) {
-            return undefined;
+            throw new Error('Not Found');
         }
-        return new UpdateResult(result);
+        return true;
     }
 
     @Authorized()
-    @Mutation(() => DeleteResult, {
+    @Mutation(() => Boolean, {
+        description: 'Replace station',
+        nullable: true,
+    })
+    async replaceStation(
+        @Arg('id', {
+            description: 'Station ID',
+        }) id: number,
+        @Args() entity: CreateStationRequest,
+    ): Promise<true> {
+        const result = await this.stationService.updateById(id, entity);
+        if (!result.affected) {
+            throw new Error('Not Found');
+        }
+        return true;
+    }
+
+    @Authorized()
+    @Mutation(() => Boolean, {
         description: 'Delete station',
         nullable: true,
     })
@@ -82,11 +98,11 @@ export default class StationResolver {
         @Arg('id', {
             description: 'Station ID',
         }) id: number,
-    ): Promise<DeleteResult | undefined> {
+    ): Promise<true> {
         const result = await this.stationService.deleteById(id);
         if (!result.affected) {
-            return undefined;
+            throw new Error('Not Found');
         }
-        return new DeleteResult(result);
+        return true;
     }
 }

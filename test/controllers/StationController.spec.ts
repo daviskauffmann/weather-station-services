@@ -1,6 +1,7 @@
 import { NotFoundError } from 'routing-controllers';
 import { Container } from 'typedi';
 import StationController from '../../src/controllers/StationController';
+import { CreateStationRequest, Station, UpdateStationRequest } from '../../src/dtos/stations';
 import StationService from '../../src/services/StationService';
 import station from '../entities/station.mock';
 import StationServiceMock from '../services/StationService.mock';
@@ -19,11 +20,9 @@ describe('StationController', () => {
     });
 
     test('should list stations', async () => {
-        const stations = [station];
-
         jest
             .spyOn(stationService, 'findMany')
-            .mockImplementation(() => ({ items: stations }) as any);
+            .mockImplementation(() => ({ entities: [station] }) as any);
 
         const result = await stationController.list({});
 
@@ -31,18 +30,17 @@ describe('StationController', () => {
             name: undefined,
         }, undefined, undefined, undefined, undefined, undefined);
         expect(result).toEqual({
-            items: stations,
+            items: [new Station(station)],
         });
     });
 
     test('should create a station', async () => {
+        const body = new CreateStationRequest();
+        body.name = station.name;
+
         jest
             .spyOn(stationService, 'insert')
             .mockImplementation(() => station as any);
-
-        const body = {
-            name: station.name,
-        };
 
         const result = await stationController.create(body);
 
@@ -79,28 +77,38 @@ describe('StationController', () => {
     });
 
     test('should update a station', async () => {
-        const body = {
-            name: station.name,
-        };
+        const body = new UpdateStationRequest();
+        body.name = station.name;
 
         jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => ({ updated: 1 }) as any);
+            .mockImplementation(() => ({ affected: 1 }) as any);
 
         const result = await stationController.update(station.id, body);
 
         expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
-        expect(result).toEqual({ updated: 1 });
+    });
+
+    test('should replace a station', async () => {
+        const body = new CreateStationRequest();
+        body.name = station.name;
+
+        jest
+            .spyOn(stationService, 'updateById')
+            .mockImplementation(() => ({ affected: 1 }) as any);
+
+        const result = await stationController.replace(station.id, body);
+
+        expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
     });
 
     test('should delete a station', async () => {
         jest
             .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => ({ deleted: 1 }) as any);
+            .mockImplementation(() => ({ affected: 1 }) as any);
 
         const result = await stationController.delete(station.id);
 
         expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
-        expect(result).toEqual({ deleted: 1 });
     });
 });

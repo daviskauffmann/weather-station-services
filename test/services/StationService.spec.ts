@@ -37,7 +37,7 @@ describe('Station Service', () => {
             skip: 0,
         });
         expect(result).toEqual({
-            items: stations,
+            entities: stations,
         });
     });
 
@@ -57,7 +57,7 @@ describe('Station Service', () => {
             skip: 0,
         });
         expect(result).toEqual({
-            items: stations,
+            entities: stations,
             total: 1,
         });
     });
@@ -125,7 +125,7 @@ describe('Station Service', () => {
         expect(stationRepository.update).toHaveBeenCalledWith({
             id: station.id,
         }, update);
-        expect(result).toEqual({ updated: 1 });
+        expect(result).toEqual({ affected: 1 });
     });
 
     test('should delete a station', async () => {
@@ -138,6 +138,6 @@ describe('Station Service', () => {
         expect(stationRepository.delete).toHaveBeenCalledWith({
             id: station.id,
         });
-        expect(result).toEqual({ deleted: 1 });
+        expect(result).toEqual({ affected: 1 });
     });
 });

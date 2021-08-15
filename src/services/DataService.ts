@@ -50,7 +50,6 @@ export default abstract class DataService<T extends ObjectLiteral> {
 
     async updateById(id: number, update: DeepPartial<T>) {
         return this.defaultRepository.update({ id }, update);
-
     }
 
     async deleteById(id: number) {
