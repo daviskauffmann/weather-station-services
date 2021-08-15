@@ -93,6 +93,7 @@ export default class StationController {
 
     @Authorized(['admin'])
     @Patch('/:id')
+    @HttpCode(204)
     @OnUndefined(204)
     @OpenAPI({
         summary: 'Update',
@@ -130,6 +131,7 @@ export default class StationController {
 
     @Authorized(['admin'])
     @Put('/:id')
+    @HttpCode(204)
     @OnUndefined(204)
     @OpenAPI({
         summary: 'Replace',
@@ -167,6 +169,7 @@ export default class StationController {
 
     @Authorized(['admin'])
     @Delete('/:id')
+    @HttpCode(204)
     @OnUndefined(204)
     @OpenAPI({
         summary: 'Delete',
