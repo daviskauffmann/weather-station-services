@@ -1,11 +1,12 @@
 import jwt from 'jsonwebtoken';
 import Koa from 'koa';
+import { ForbiddenError, UnauthorizedError } from 'routing-controllers';
 import { env } from './environment';
 
 export default function (request: Koa.Context, roles: string[]) {
     const authorization = request.headers['authorization'];
     if (!authorization) {
-        return false;
+        throw new UnauthorizedError();
     }
 
     const accessToken = authorization.replace('Bearer ', '');
@@ -13,13 +14,12 @@ export default function (request: Koa.Context, roles: string[]) {
     try {
         decoded = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET) as jwt.JwtPayload;
     } catch (err) {
-        err.httpCode = 401;
-        throw err;
+        throw new UnauthorizedError(err.message);
     }
 
     for (const role of roles) {
         if (!(decoded.roles as string[]).includes(role)) {
-            return false;
+            throw new ForbiddenError();
         }
     }
 

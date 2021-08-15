@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
 import { EntityRepository } from 'typeorm';
-import User from '../entities/User';
+import UserEntity from '../entities/UserEntity';
 import BaseRepository from './BaseRepository';
 
 @Service()
-@EntityRepository(User)
-export default class UserRepository extends BaseRepository<User> {
+@EntityRepository(UserEntity)
+export default class UserRepository extends BaseRepository<UserEntity> {
     constructor() {
         super('user');
     }

@@ -1,13 +1,13 @@
 import { Service } from 'typedi';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import Station from '../entities/Station';
+import StationEntity from '../entities/StationEntity';
 import StationRepository from '../repositories/StationRepository';
 import DataService from './DataService';
 
 @Service()
-export default class StationService extends DataService<Station> {
+export default class StationService extends DataService<StationEntity> {
     constructor(
-        @InjectRepository(Station) private stationRepository: StationRepository,
+        @InjectRepository(StationEntity) private stationRepository: StationRepository,
     ) {
         super(stationRepository);
     }

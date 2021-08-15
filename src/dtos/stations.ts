@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ArgsType, Field, Int, ObjectType } from 'type-graphql';
-import StationEntity from '../entities/Station';
+import StationEntity from '../entities/StationEntity';
 import { FindManyResult } from '../services/DataService';
 import ListRequest from './ListRequest';
 

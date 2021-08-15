@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
-import Station from '../entities/Station';
-import User from '../entities/User';
+import StationEntity from '../entities/StationEntity';
+import UserEntity from '../entities/UserEntity';
 import { env } from './environment';
 
-export function generateUserTokens(user: User) {
+export function generateUserTokens(user: UserEntity) {
     return {
         accessToken: jwt.sign({
             sub: user.id,
@@ -16,7 +16,7 @@ export function generateUserTokens(user: User) {
     };
 }
 
-export function generateStationToken(station: Station) {
+export function generateStationToken(station: StationEntity) {
     return {
         accessToken: jwt.sign({
             sub: station.id,

@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
 import { EntityRepository } from 'typeorm';
-import Reading from '../entities/Reading';
+import ReadingEntity from '../entities/ReadingEntity';
 import TimescaleRepository from './TimescaleRepository';
 
 @Service()
-@EntityRepository(Reading)
-export default class ReadingRepository extends TimescaleRepository<Reading> {
+@EntityRepository(ReadingEntity)
+export default class ReadingRepository extends TimescaleRepository<ReadingEntity> {
     constructor() {
         super('reading');
     }

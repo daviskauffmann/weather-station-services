@@ -21,9 +21,9 @@ import ReadingController from './controllers/ReadingController';
 import StationController from './controllers/StationController';
 import TokenController from './controllers/TokenController';
 import UserController from './controllers/UserController';
-import Reading from './entities/Reading';
-import Station from './entities/Station';
-import User from './entities/User';
+import ReadingEntity from './entities/ReadingEntity';
+import StationEntity from './entities/StationEntity';
+import UserEntity from './entities/UserEntity';
 import BaseRepository from './repositories/BaseRepository';
 import ReadingRepository from './repositories/ReadingRepository';
 import StationRepository from './repositories/StationRepository';
@@ -54,9 +54,9 @@ createConnection({
     password: env.POSTGRES_PASSWORD,
     database: env.POSTGRES_DATABASE,
     entities: [
-        Reading,
-        Station,
-        User,
+        ReadingEntity,
+        StationEntity,
+        UserEntity,
     ],
     synchronize: true,
 }).then(async () => {
@@ -111,21 +111,6 @@ createConnection({
         },
     }));
 
-    // default error handler
-    app.use(async (ctx, next) => {
-        try {
-            await next();
-        } catch (err) {
-            ctx.status = err.httpCode || 500;
-            ctx.body = {
-                name: err.name,
-                message: err.message || undefined,
-                stack: err.stack,
-                errors: err.errors,
-            };
-        }
-    });
-
     // routing controllers
     const routingControllersOptions: RoutingControllersOptions = {
         controllers: [
@@ -135,6 +120,11 @@ createConnection({
             UserController,
         ],
         authorizationChecker: ({ context }, roles) => checkAuth(context, roles),
+        validation: {
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            forbidUnknownValues: true,
+        },
     };
 
     useKoaServer(app, routingControllersOptions);

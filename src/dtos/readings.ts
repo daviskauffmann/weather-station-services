@@ -1,7 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import { IsDate, IsNumber, ValidateNested } from 'class-validator';
 import { ArgsType, Field, ObjectType } from 'type-graphql';
-import ReadingEntity from '../entities/Reading';
+import ReadingEntity from '../entities/ReadingEntity';
 
 @ObjectType({
     description: 'Reading',

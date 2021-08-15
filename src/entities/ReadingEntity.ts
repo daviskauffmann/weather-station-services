@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'reading' })
-export default class Reading {
+export default class ReadingEntity {
     @PrimaryColumn({ type: 'timestamp without time zone' })
     time!: Date;
 
