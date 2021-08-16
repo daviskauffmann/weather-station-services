@@ -17,9 +17,11 @@ export default class ReadingService extends DataService<ReadingEntity> {
         return undefined;
     }
 
-    async search() {
-        return {
-            items: await this.readingRepository.averageTemperatureInterval(),
-        };
+    async averageTemperaturesByStation() {
+        return this.readingRepository.averageTemperaturesByStation();
+    }
+
+    async averageTemperatureForStation(stationId: number) {
+        return this.readingRepository.averageTemperatureForStation(stationId);
     }
 }

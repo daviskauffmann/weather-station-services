@@ -1,5 +1,5 @@
-import { Transform, Type } from 'class-transformer';
-import { IsDate, IsNumber, ValidateNested } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsDate, IsNumber, IsOptional } from 'class-validator';
 import { ArgsType, Field, ObjectType } from 'type-graphql';
 import ReadingEntity from '../entities/ReadingEntity';
 
@@ -61,14 +61,8 @@ export class CreateReadingRequest {
     rain1h!: number;
 }
 
-@ObjectType({
-    description: 'Search readings response',
-})
-export class SearchReadingsResponse {
-    @Field(() => [String], {
-        description: 'Items',
-    })
-    @ValidateNested({ each: true })
-    @Type(() => String)
-    items!: string[];
+export class SearchReadingRequest {
+    @IsNumber()
+    @IsOptional()
+    stationId?: number;
 }

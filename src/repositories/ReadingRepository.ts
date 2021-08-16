@@ -10,7 +10,7 @@ export default class ReadingRepository extends TimescaleRepository<ReadingEntity
         super('reading');
     }
 
-    async averageTemperatureTotal() {
+    async averageTemperaturesByStation() {
         return this.createQueryBuilder()
             .select(`
                 ${this.tableName}.station_id AS "stationId",
@@ -22,7 +22,20 @@ export default class ReadingRepository extends TimescaleRepository<ReadingEntity
             .execute();
     }
 
-    async averageTemperatureInterval() {
+    async averageTemperatureForStation(stationId: number) {
+        return this.createQueryBuilder()
+            .select(`
+                avg(${this.tableName}.temperature) AS "averageTemperature"
+            `)
+            .from(this.tableName, this.tableName)
+            .where(`${this.tableName}.station_id = :stationId AND ${this.tableName}.time > now() - INTERVAL '2 years'`, {
+                stationId,
+            })
+            .execute()
+            .then(raw => Number(raw[0].averageTemperature));
+    }
+
+    private async averageTemperatureInterval() {
         return this.createQueryBuilder()
             .select(`
                 time_bucket('15 days', ${this.tableName}.time) AS "bucket",
@@ -36,7 +49,7 @@ export default class ReadingRepository extends TimescaleRepository<ReadingEntity
             .execute();
     }
 
-    async sumRainInterval() {
+    private async sumRain1hInterval() {
         return this.createQueryBuilder()
             .select(`
                 time_bucket_gapfill('30 days', ${this.tableName}.time) as "bucket",

@@ -1,9 +1,9 @@
 import Koa from 'koa';
-import { Authorized, BadRequestError, Body, Ctx, Get, HttpCode, JsonController, Post } from 'routing-controllers';
+import { Authorized, BadRequestError, Body, Ctx, Get, HttpCode, JsonController, Post, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
 import ApiError from '../dtos/ApiError';
-import { CreateReadingRequest, Reading, SearchReadingsResponse } from '../dtos/readings';
+import { CreateReadingRequest, Reading, SearchReadingRequest } from '../dtos/readings';
 import ReadingService from '../services/ReadingService';
 import StationService from '../services/StationService';
 
@@ -53,16 +53,25 @@ export default class ReadingController {
     @OpenAPI({
         summary: 'Search',
         description: 'Search readings',
-    })
-    @ResponseSchema(SearchReadingsResponse, {
-        description: 'Search results',
-        statusCode: 200,
+        responses: {
+            200: {
+                description: 'Search results',
+            },
+        },
     })
     @ResponseSchema(ApiError, {
         description: 'Invalid body',
         statusCode: 400,
     })
-    async search(): Promise<SearchReadingsResponse> {
-        return this.readingService.search();
+    async search(
+        @QueryParams() query: SearchReadingRequest,
+    ): Promise<any> {
+        if (query.stationId) {
+            return {
+                averageTemperature: await this.readingService.averageTemperatureForStation(query.stationId),
+            };
+        } else {
+            return this.readingService.averageTemperaturesByStation();
+        }
     }
 }

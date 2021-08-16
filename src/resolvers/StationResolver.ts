@@ -1,7 +1,8 @@
-import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Args, Authorized, FieldResolver, Mutation, Query, Resolver, Root } from 'type-graphql';
 import { Service } from 'typedi';
 import GetRequest from '../dtos/GetRequest';
 import { CreateStationRequest, ListStationsRequest, ListStationsResponse, Station, UpdateStationRequest } from '../dtos/stations';
+import ReadingService from '../services/ReadingService';
 import StationService from '../services/StationService';
 
 @Service()
@@ -9,6 +10,7 @@ import StationService from '../services/StationService';
 export default class StationResolver {
     constructor(
         private stationService: StationService,
+        private readingService: ReadingService,
     ) { }
 
     @Authorized()
@@ -104,5 +106,14 @@ export default class StationResolver {
             throw new Error('Not Found');
         }
         return true;
+    }
+
+    @FieldResolver(() => Number, {
+        description: 'Average temperature',
+    })
+    async averageTemperature(
+        @Root() station: Station,
+    ) {
+        return this.readingService.averageTemperatureForStation(station.id);
     }
 }
