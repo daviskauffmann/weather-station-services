@@ -5,14 +5,14 @@
   "main": "dist",
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc -w",
+    "build:dev": "tsc -w",
     "clean": "rm -rf dist",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts",
     "start": "node -r dotenv/config -r source-map-support/register dist",
-    "start:watch": "nodemon --delay 1 -r dotenv/config -r source-map-support/register dist",
+    "start:dev": "nodemon --delay 1 -r dotenv/config -r source-map-support/register dist",
     "test": "jest --coverage",
-    "test:watch": "jest --watchAll --coverage"
+    "test:dev": "jest --watchAll --coverage"
   },
   "repository": {
     "type": "git",
@@ -31,9 +31,9 @@
   "dependencies": {
     "@koa/cors": "^3.1.0",
     "bcrypt": "^5.0.1",
-    "class-transformer": "0.3.1",
-    "class-validator": "^0.12.2",
-    "class-validator-jsonschema": "^2.2.0",
+    "class-transformer": "^0.4.0",
+    "class-validator": "^0.13.1",
+    "class-validator-jsonschema": "^3.1.0",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",
     "envsafe": "^2.0.3",

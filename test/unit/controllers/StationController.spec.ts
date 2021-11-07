@@ -1,28 +1,30 @@
 import { NotFoundError } from 'routing-controllers';
 import { Container } from 'typedi';
-import StationController from '../../src/controllers/StationController';
-import { CreateStationRequest, Station, UpdateStationRequest } from '../../src/dtos/stations';
-import StationService from '../../src/services/StationService';
-import station from '../entities/station.mock';
-import StationServiceMock from '../services/StationService.mock';
+import StationController from '../../../src/controllers/StationController';
+import StationService from '../../../src/services/StationService';
+import CreateStationRequest from '../../../src/types/CreateStationRequest';
+import Station from '../../../src/types/Station';
+import UpdateStationRequest from '../../../src/types/UpdateStationRequest';
+import station from '../../mocks/entities/station.mock';
+import StationServiceMock from '../../mocks/services/StationService.mock';
 
 describe('StationController', () => {
-    let stationService: StationService;
     let stationController: StationController;
+    let stationService: StationService;
 
     beforeEach(async () => {
         Container.reset();
 
         Container.set(StationService, new StationServiceMock());
 
-        stationService = Container.get(StationService);
         stationController = Container.get(StationController);
+        stationService = Container.get(StationService);
     });
 
     test('should list stations', async () => {
         jest
             .spyOn(stationService, 'findMany')
-            .mockImplementation(() => ({ entities: [station] }) as any);
+            .mockImplementation(async () => ({ entities: [station] }));
 
         const result = await stationController.list({});
 
@@ -40,7 +42,7 @@ describe('StationController', () => {
 
         jest
             .spyOn(stationService, 'insert')
-            .mockImplementation(() => station as any);
+            .mockImplementation(async () => station);
 
         const result = await stationController.create(body);
 
@@ -51,7 +53,7 @@ describe('StationController', () => {
     test('should get a station by id', async () => {
         jest
             .spyOn(stationService, 'findById')
-            .mockImplementation(() => station as any);
+            .mockImplementation(async () => station);
 
         const result = await stationController.get(station.id, {});
 
@@ -63,7 +65,7 @@ describe('StationController', () => {
     test('should fail to get a station by id', async () => {
         jest
             .spyOn(stationService, 'findById')
-            .mockImplementation(() => undefined as any);
+            .mockImplementation(async () => undefined);
 
         try {
             await stationController.get(station.id, {});
@@ -82,9 +84,9 @@ describe('StationController', () => {
 
         jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => ({ affected: 1 }) as any);
+            .mockImplementation(async () => ({ affected: 1, raw: {}, generatedMaps: [] }));
 
-        const result = await stationController.update(station.id, body);
+        await stationController.update(station.id, body);
 
         expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
     });
@@ -95,9 +97,9 @@ describe('StationController', () => {
 
         jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => ({ affected: 1 }) as any);
+            .mockImplementation(async () => ({ affected: 1, raw: {}, generatedMaps: [] }));
 
-        const result = await stationController.replace(station.id, body);
+        await stationController.replace(station.id, body);
 
         expect(stationService.updateById).toHaveBeenCalledWith(station.id, body);
     });
@@ -105,9 +107,9 @@ describe('StationController', () => {
     test('should delete a station', async () => {
         jest
             .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => ({ affected: 1 }) as any);
+            .mockImplementation(async () => ({ affected: 1, raw: {}, generatedMaps: [] }));
 
-        const result = await stationController.delete(station.id);
+        await stationController.delete(station.id);
 
         expect(stationService.deleteById).toHaveBeenCalledWith(station.id);
     });

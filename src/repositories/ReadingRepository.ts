@@ -1,13 +1,13 @@
 import { Service } from 'typedi';
 import { EntityRepository } from 'typeorm';
-import ReadingEntity from '../entities/ReadingEntity';
+import ReadingEntity, { name as tableName } from '../entities/ReadingEntity';
 import TimescaleRepository from './TimescaleRepository';
 
 @Service()
 @EntityRepository(ReadingEntity)
 export default class ReadingRepository extends TimescaleRepository<ReadingEntity> {
     constructor() {
-        super('reading');
+        super(tableName);
     }
 
     async averageTemperaturesByStation() {

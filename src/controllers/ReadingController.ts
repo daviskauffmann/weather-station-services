@@ -2,10 +2,12 @@ import Koa from 'koa';
 import { Authorized, BadRequestError, Body, Ctx, Get, HttpCode, JsonController, Post, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
-import ApiError from '../dtos/ApiError';
-import { CreateReadingRequest, Reading, SearchReadingRequest } from '../dtos/readings';
 import ReadingService from '../services/ReadingService';
 import StationService from '../services/StationService';
+import ApiError from '../types/ApiError';
+import CreateReadingRequest from '../types/CreateReadingRequest';
+import Reading from '../types/Reading';
+import SearchReadingRequest from '../types/SearchReadingRequest';
 
 @JsonController('/api/readings')
 @Service()

@@ -1,12 +1,16 @@
 import { Authorized, Body, Delete, Get, HttpCode, JsonController, NotFoundError, OnUndefined, Param, Patch, Post, Put, QueryParams } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Service } from 'typedi';
-import ApiError from '../dtos/ApiError';
-import GetRequest from '../dtos/GetRequest';
-import { CreateStationRequest, ListStationsRequest, ListStationsResponse, Station, UpdateStationRequest } from '../dtos/stations';
-import { AccessTokenResponse } from '../dtos/tokens';
 import StationService from '../services/StationService';
-import { generateStationToken } from '../utils/tokens';
+import ApiError from '../types/ApiError';
+import CreateStationRequest from '../types/CreateStationRequest';
+import GetRequest from '../types/GetRequest';
+import ListStationsRequest from '../types/ListStationsRequest';
+import ListStationsResponse from '../types/ListStationsResponse';
+import Station from '../types/Station';
+import StationTokenResponse from '../types/StationTokenResponse';
+import UpdateStationRequest from '../types/UpdateStationRequest';
+import generateStationToken from '../utils/generateStationToken';
 
 @JsonController('/api/stations')
 @Service()
@@ -33,7 +37,7 @@ export default class StationController {
     ): Promise<ListStationsResponse> {
         const result = await this.stationService.findMany({
             ...query.name && { name: query.name },
-        }, query.total, query.pageSize, query.pageNumber, query.select?.split(','), query.relations?.split(','));
+        }, query.total, query.pageSize, query.pageNumber, query.select, query.relations);
         return new ListStationsResponse(result, query.pageSize, query.pageNumber);
     }
 
@@ -84,7 +88,7 @@ export default class StationController {
         @Param('id') id: number,
         @QueryParams() query: GetRequest,
     ): Promise<Station | undefined> {
-        const station = await this.stationService.findById(id, query.select?.split(','), query.relations?.split(','));
+        const station = await this.stationService.findById(id, query.select, query.relations);
         if (!station) {
             return undefined;
         }
@@ -213,7 +217,7 @@ export default class StationController {
             },
         ],
     })
-    @ResponseSchema(AccessTokenResponse, {
+    @ResponseSchema(StationTokenResponse, {
         description: 'Access token generated',
         statusCode: 200,
     })
@@ -223,7 +227,7 @@ export default class StationController {
     })
     async generateToken(
         @Param('id') id: number,
-    ): Promise<AccessTokenResponse> {
+    ): Promise<StationTokenResponse> {
         const station = await this.stationService.findById(id);
         if (!station) {
             throw new NotFoundError();

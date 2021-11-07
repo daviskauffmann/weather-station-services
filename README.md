@@ -8,52 +8,47 @@ Copy `example.env` and rename to `.env`. Fill out the variables with the appropr
 
 ### Install dependencies
 
-```sh
-npm install
+```bash
+yarn install
 ```
 
 ### Build
 
-```sh
-npm run build
-```
+```bash
+yarn build
 
-To watch for changes to source files:
-
-```sh
-npm run build:watch
+# to watch for changes to source files
+yarn build:dev
 ```
 
 ### Run
 
-```sh
-npm start
-```
+```bash
+yarn start
 
-To watch for changes to built files:
-
-```sh
-npm run start:watch
+# to watch for changes to built files
+yarn start:dev
 ```
 
 ### Test
 
-To run the linter:
+```bash
+# run the linter
+yarn lint
 
-```sh
-npm run lint
-```
+# to automatically fix linting issues
+yarn lint:fix
 
-To run tests:
+# run tests
+yarn test
 
-```sh
-npm test
+# to watch for changes
+yarn test:dev
 ```
 
 ### Clean
 
-To clean all build output:
-
-```sh
-npm run clean
+```bash
+# clean all build output
+yarn clean
 ```

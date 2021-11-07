@@ -1,16 +1,18 @@
-import { Arg, Args, Authorized, FieldResolver, Mutation, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import GetRequest from '../dtos/GetRequest';
-import { CreateStationRequest, ListStationsRequest, ListStationsResponse, Station, UpdateStationRequest } from '../dtos/stations';
-import ReadingService from '../services/ReadingService';
 import StationService from '../services/StationService';
+import CreateStationRequest from '../types/CreateStationRequest';
+import GetRequest from '../types/GetRequest';
+import ListStationsRequest from '../types/ListStationsRequest';
+import ListStationsResponse from '../types/ListStationsResponse';
+import Station from '../types/Station';
+import UpdateStationRequest from '../types/UpdateStationRequest';
 
 @Service()
 @Resolver(() => Station)
 export default class StationResolver {
     constructor(
         private stationService: StationService,
-        private readingService: ReadingService,
     ) { }
 
     @Authorized()
@@ -37,7 +39,7 @@ export default class StationResolver {
         }) id: number,
         @Args() args: GetRequest,
     ): Promise<Station | undefined> {
-        const station = await this.stationService.findById(id, args.select?.split(','), args.relations?.split(','));
+        const station = await this.stationService.findById(id, args.select, args.relations);
         if (!station) {
             return undefined;
         }
@@ -106,14 +108,5 @@ export default class StationResolver {
             throw new Error('Not Found');
         }
         return true;
-    }
-
-    @FieldResolver(() => Number, {
-        description: 'Average temperature',
-    })
-    async averageTemperature(
-        @Root() station: Station,
-    ) {
-        return this.readingService.averageTemperatureForStation(station.id);
     }
 }

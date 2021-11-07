@@ -1,7 +1,8 @@
 import { Args, Authorized, Mutation, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import { CreateReadingRequest, Reading } from '../dtos/readings';
 import ReadingService from '../services/ReadingService';
+import CreateReadingRequest from '../types/CreateReadingRequest';
+import Reading from '../types/Reading';
 
 @Service()
 @Resolver(() => Reading)

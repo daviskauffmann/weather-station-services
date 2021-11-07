@@ -1,6 +1,5 @@
 import cors from '@koa/cors';
 import bcrypt from 'bcrypt';
-import { defaultMetadataStorage } from 'class-transformer/storage';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import debug from 'debug';
 import Koa from 'koa';
@@ -15,12 +14,11 @@ import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { createSocketServer, useContainer as scUseContainer } from 'socket-controllers';
 import { buildSchema } from 'type-graphql';
 import { Container, Token } from 'typedi';
-import { createConnection, getManager, ObjectLiteral, useContainer as typeOrmUserCOntainer } from 'typeorm';
+import { createConnection, getManager, ObjectLiteral, useContainer as typeOrmUseContainer } from 'typeorm';
+import AuthController from './controllers/AuthController';
 import MessageController from './controllers/MessageController';
 import ReadingController from './controllers/ReadingController';
 import StationController from './controllers/StationController';
-import TokenController from './controllers/TokenController';
-import UserController from './controllers/UserController';
 import ReadingEntity from './entities/ReadingEntity';
 import StationEntity from './entities/StationEntity';
 import UserEntity from './entities/UserEntity';
@@ -39,7 +37,7 @@ import updatePostman from './utils/updatePostman';
 // cvUseContainer(Container);
 rcUseContainer(Container);
 scUseContainer(Container);
-typeOrmUserCOntainer(Container);
+typeOrmUseContainer(Container);
 
 const log = debug(`${pkg.name}`);
 const error = debug(`${pkg.name}:error`);
@@ -71,6 +69,7 @@ createConnection({
     ] as Token<BaseRepository<ObjectLiteral>>[]).map(Repository => Container.get(Repository).init()));
 
     // TODO: insert admin user if not exists
+    // TODO: move to seed script
     await getManager().query(`
         INSERT INTO "user" ("id", "username", "password", "email", "roles")
         SELECT
@@ -114,10 +113,9 @@ createConnection({
     // routing controllers
     const routingControllersOptions: RoutingControllersOptions = {
         controllers: [
+            AuthController,
             ReadingController,
             StationController,
-            TokenController,
-            UserController,
         ],
         authorizationChecker: ({ context }, roles) => checkAuth(context, roles),
         validation: {
@@ -156,7 +154,7 @@ createConnection({
     const spec = routingControllersToSpec(getMetadataArgsStorage(), routingControllersOptions, {
         components: {
             schemas: validationMetadatasToSchemas({
-                classTransformerMetadataStorage: defaultMetadataStorage,
+                classTransformerMetadataStorage: require('class-transformer/cjs/storage').defaultMetadataStorage,
                 refPointerPrefix: '#/components/schemas/',
             }),
             securitySchemes: {
@@ -172,9 +170,9 @@ createConnection({
             },
         ],
         info: {
-            description: 'Generated with `routing-controllers-openapi`',
-            title: 'A sample API',
-            version: '1.0.0',
+            title: pkg.name,
+            version: pkg.version,
+            description: pkg.description,
         },
     });
 

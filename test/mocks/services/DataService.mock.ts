@@ -3,6 +3,9 @@ export default abstract class DataServiceMock {
     findOne() { }
     findById() { }
     insert() { }
+    insertMany() { }
+    update() { }
     updateById() { }
+    delete() { }
     deleteById() { }
 }

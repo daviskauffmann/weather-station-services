@@ -2,20 +2,20 @@ import { IsOptional, IsString } from 'class-validator';
 import { ArgsType, Field } from 'type-graphql';
 
 @ArgsType()
-export default class GetRequest {
+export default abstract class GetRequest {
     @Field(() => [String], {
         description: 'Select fields',
         nullable: true,
     })
-    @IsString()
+    @IsString({ each: true })
     @IsOptional()
-    select?: string;
+    select?: string[];
 
     @Field(() => [String], {
         description: 'Load relations',
         nullable: true,
     })
-    @IsString()
+    @IsString({ each: true })
     @IsOptional()
-    relations?: string;
+    relations?: string[];
 }

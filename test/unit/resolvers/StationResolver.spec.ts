@@ -1,27 +1,29 @@
 import { Container } from 'typedi';
-import { CreateStationRequest, Station, UpdateStationRequest } from '../../src/dtos/stations';
-import StationResolver from '../../src/resolvers/StationResolver';
-import StationService from '../../src/services/StationService';
-import station from '../entities/station.mock';
-import StationServiceMock from '../services/StationService.mock';
+import StationResolver from '../../../src/resolvers/StationResolver';
+import StationService from '../../../src/services/StationService';
+import CreateStationRequest from '../../../src/types/CreateStationRequest';
+import Station from '../../../src/types/Station';
+import UpdateStationRequest from '../../../src/types/UpdateStationRequest';
+import station from '../../mocks/entities/station.mock';
+import StationServiceMock from '../../mocks/services/StationService.mock';
 
-describe('Station Resolver', () => {
-    let stationService: StationService;
+describe('StationResolver', () => {
     let stationResolver: StationResolver;
+    let stationService: StationService;
 
     beforeEach(async () => {
         Container.reset();
 
         Container.set(StationService, new StationServiceMock());
 
-        stationService = Container.get(StationService);
         stationResolver = Container.get(StationResolver);
+        stationService = Container.get(StationService);
     });
 
     test('should list stations', async () => {
         jest
             .spyOn(stationService, 'findMany')
-            .mockImplementation(() => ({ entities: [station] }) as any);
+            .mockImplementation(async () => ({ entities: [station] }));
 
         const result = await stationResolver.stations({});
 
@@ -36,7 +38,7 @@ describe('Station Resolver', () => {
     test('should get a station by id', async () => {
         jest
             .spyOn(stationService, 'findById')
-            .mockImplementation(() => station as any);
+            .mockImplementation(async () => station);
 
         const result = await stationResolver.station(station.id, {});
 
@@ -48,7 +50,7 @@ describe('Station Resolver', () => {
     test('should fail to get a station by id', async () => {
         jest
             .spyOn(stationService, 'findById')
-            .mockImplementation(() => undefined as any);
+            .mockImplementation(async () => undefined);
 
         const result = await stationResolver.station(station.id, {});
 
@@ -62,7 +64,7 @@ describe('Station Resolver', () => {
 
         jest
             .spyOn(stationService, 'insert')
-            .mockImplementation(() => station as any);
+            .mockImplementation(async () => station);
 
         const result = await stationResolver.createStation(entity);
 
@@ -76,7 +78,7 @@ describe('Station Resolver', () => {
 
         jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => ({ affected: 1 }) as any);
+            .mockImplementation(async () => ({ affected: 1, raw: {}, generatedMaps: [] }));
 
         const result = await stationResolver.updateStation(station.id, update);
 
@@ -90,7 +92,7 @@ describe('Station Resolver', () => {
 
         jest
             .spyOn(stationService, 'updateById')
-            .mockImplementation(() => ({ affected: 1 }) as any);
+            .mockImplementation(async () => ({ affected: 1, raw: {}, generatedMaps: [] }));
 
         const result = await stationResolver.replaceStation(station.id, entity);
 
@@ -101,7 +103,7 @@ describe('Station Resolver', () => {
     test('should delete a station', async () => {
         jest
             .spyOn(stationService, 'deleteById')
-            .mockImplementation(() => ({ affected: 1 }) as any);
+            .mockImplementation(async () => ({ affected: 1, raw: {}, generatedMaps: [] }));
 
         const result = await stationResolver.deleteStation(station.id);
 

@@ -11,7 +11,7 @@ export default abstract class DataService<T extends ObjectLiteral> {
         protected defaultRepository: BaseRepository<T>,
     ) { }
 
-    async findMany(conditions: FindConditions<T>, total?: boolean, pageSize?: number, pageNumber?: number, select?: string[], relations?: string[]): Promise<FindManyResult<T>> {
+    async findMany(conditions?: FindConditions<T>, total?: boolean, pageSize?: number, pageNumber?: number, select?: string[], relations?: string[]): Promise<FindManyResult<T>> {
         const options: FindManyOptions<T> = {
             where: conditions,
             take: pageSize,
@@ -48,12 +48,24 @@ export default abstract class DataService<T extends ObjectLiteral> {
         return this.defaultRepository.insertAndReturn(entity);
     }
 
+    async insertMany(entities: DeepPartial<T>[]) {
+        return this.defaultRepository.insert(entities);
+    }
+
+    async update(conditions: FindConditions<T>, update: DeepPartial<T>) {
+        return this.defaultRepository.update(conditions, update);
+    }
+
     async updateById(id: number, update: DeepPartial<T>) {
-        return this.defaultRepository.update({ id }, update);
+        return this.update({ id }, update);
+    }
+
+    async delete(conditions: FindConditions<T>) {
+        return this.defaultRepository.delete(conditions);
     }
 
     async deleteById(id: number) {
-        return this.defaultRepository.delete({ id });
+        return this.delete({ id });
     }
 
     private validateSelect(select?: string[]) {
@@ -74,6 +86,7 @@ export default abstract class DataService<T extends ObjectLiteral> {
     private validateRelations(relations?: string[]) {
         if (relations) {
             const metadata = getConnection().getMetadata(this.defaultRepository.tableName);
+
             return relations.reduce((relations, field) => {
                 if (metadata.relations.find(relation => relation.propertyName === field)) {
                     relations.push(field);
