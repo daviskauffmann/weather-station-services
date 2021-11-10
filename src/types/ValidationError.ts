@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, ValidateNested } from 'class-validator';
 
-export class ValidationError {
+export default class ValidationError {
     @IsOptional()
     target?: object;
 

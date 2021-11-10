@@ -1,8 +1,8 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-export const name = 'reading';
+export const tableName = 'reading';
 
-@Entity({ name })
+@Entity({ name: tableName })
 export default class ReadingEntity {
     @PrimaryColumn({ type: 'timestamp without time zone' })
     time!: Date;

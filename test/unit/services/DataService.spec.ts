@@ -142,6 +142,27 @@ describe('Unit - DataService', () => {
         expect(result).toEqual(testEntity);
     });
 
+    test('should create many entities', async () => {
+        jest
+            .spyOn(testRepository, 'insert')
+            .mockImplementation(async () => ({ identifiers: [], raw: {}, generatedMaps: [] }));
+
+        const entities: Partial<TestEntity>[] = [
+            {
+                name: testEntity.name,
+            },
+            {
+
+                name: testEntity.name,
+            }
+        ];
+
+        const result = await testService.insertMany(entities);
+
+        expect(testRepository.insert).toHaveBeenCalledWith(entities);
+        expect(result).toEqual(({ identifiers: [], raw: {}, generatedMaps: [] }));
+    });
+
     test('should update an entity', async () => {
         jest
             .spyOn(testRepository, 'update')

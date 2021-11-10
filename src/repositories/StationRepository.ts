@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { EntityRepository } from 'typeorm';
-import StationEntity, { name as tableName } from '../entities/StationEntity';
+import StationEntity, { tableName } from '../entities/StationEntity';
 import BaseRepository from './BaseRepository';
 
 @Service()

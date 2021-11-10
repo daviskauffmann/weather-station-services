@@ -1,8 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export const name = 'station';
+export const tableName = 'station';
 
-@Entity({ name })
+@Entity({ name: tableName })
 export default class StationEntity {
     @PrimaryGeneratedColumn()
     id!: number;

@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { EntityRepository } from 'typeorm';
-import ReadingEntity, { name as tableName } from '../entities/ReadingEntity';
+import ReadingEntity, { tableName } from '../entities/ReadingEntity';
 import TimescaleRepository from './TimescaleRepository';
 
 @Service()
