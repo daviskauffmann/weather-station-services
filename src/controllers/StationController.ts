@@ -90,7 +90,7 @@ export default class StationController {
     ): Promise<Station | undefined> {
         const station = await this.stationService.findById(id, query.select, query.relations);
         if (!station) {
-            return undefined;
+            throw new NotFoundError();
         }
         return new Station(station);
     }

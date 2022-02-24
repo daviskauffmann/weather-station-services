@@ -13,6 +13,15 @@ export default class ReadingEntity {
     @Column({ type: 'double precision' })
     temperature!: number;
 
+    @Column({ type: 'double precision' })
+    pressure!: number;
+
+    @Column({ type: 'double precision' })
+    humidity!: number;
+
+    @Column({ name: 'wind_speed', type: 'double precision' })
+    windSpeed!: number;
+
     @Column({ name: 'rain_1h', type: 'double precision' })
     rain1h!: number;
 }

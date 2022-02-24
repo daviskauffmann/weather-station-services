@@ -4,15 +4,12 @@ import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import debug from 'debug';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import graphqlHTTP from 'koa-graphql';
 import helmet from 'koa-helmet';
 import logger from 'koa-logger';
-import mount from 'koa-mount';
 import { koaSwagger } from 'koa2-swagger-ui';
 import { getMetadataArgsStorage, RoutingControllersOptions, useContainer as rcUseContainer, useKoaServer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { createSocketServer, useContainer as scUseContainer } from 'socket-controllers';
-import { buildSchema } from 'type-graphql';
 import { Container, Token } from 'typedi';
 import { createConnection, getManager, ObjectLiteral, useContainer as typeOrmUseContainer } from 'typeorm';
 import AuthController from './controllers/AuthController';
@@ -26,8 +23,6 @@ import BaseRepository from './repositories/BaseRepository';
 import ReadingRepository from './repositories/ReadingRepository';
 import StationRepository from './repositories/StationRepository';
 import UserRepository from './repositories/UserRepository';
-import ReadingResolver from './resolvers/ReadingResolver';
-import StationResolver from './resolvers/StationResolver';
 import checkAuth from './utils/checkAuth';
 import { env, pkg } from './utils/environment';
 import updatePostman from './utils/updatePostman';
@@ -135,21 +130,6 @@ createConnection({
         ],
     });
 
-    // graphql
-    const schema = await buildSchema({
-        resolvers: [
-            ReadingResolver,
-            StationResolver,
-        ],
-        container: Container,
-        authChecker: ({ context }, roles) => checkAuth(context, roles),
-    });
-
-    app.use(mount('/graphql', graphqlHTTP({
-        schema,
-        graphiql: env.NODE_ENV !== 'production',
-    })));
-
     // swagger
     const spec = routingControllersToSpec(getMetadataArgsStorage(), routingControllersOptions, {
         components: {
@@ -186,6 +166,6 @@ createConnection({
     app.listen(env.PORT, () => {
         log(`listening on port ${env.PORT}`);
 
-        updatePostman(spec, schema);
+        updatePostman(spec);
     });
 });
